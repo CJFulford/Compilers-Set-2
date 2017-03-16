@@ -1,0 +1,10 @@
+Prog. prog ::= block ;
+
+Blok. block ::= declarations program_body ;
+
+Dec. declarations ::= declaration ";" declarations ;
+DecE. declarations ::= ;
+
+DecV. decaaration ::= var_declaration ;
+DecF. declaration ::= fun_declaration ;
+DecD. declaration ::= data_declaration ;
