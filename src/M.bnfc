@@ -1,15 +1,22 @@
+comment "%" ;
+comment "/*" "*/" ;
+
+token CID ('#' ('_' | digit | letter)*) ;
+token ID (letter ('_' | digit | letter)*) ;
+
+
 Prog.   prog ::= block ;
 
-Blok.   block ::= declarations program_body ;
+Block.  block ::= declarations program_body ;
 
 Dec.    declarations ::= declaration ";" declarations ;
-DecE.   declarations ::= ;
+DecN.   declarations ::= ;
 
-DecV.   declaration ::=  var_declaration ;
-DecF.   declaration ::=  fun_declaration ;
+DecV.   declaration ::= var_declaration ;
+DecF.   declaration ::= fun_declaration ;
 DecD.   declaration ::= data_declaration ;
 
-VarD.   var_declaration ::= var_specs ":" type ;
+VarD.   var_declaration ::= "var" var_specs ":" type ;
 
 VarS.   var_specs ::= var_spec more_var_specs ;
 
@@ -21,88 +28,88 @@ VarSp.  var_spec ::= array_dimensions ;
 ArrDi.  array_dimensions ::= "[" expr "]" array_dimensions ;
 ArrD.   array_dimensions ::= ;
 
-TInt.   type ::= "INT" ;
-TRea.   type ::= "REAL" ;
-TBoo.   type ::= "BOOL" ;
-TCha.   type ::= "CHAR" ;
-Tid.    type ::= "ID" ;
+TInt.   type ::= "int" ;
+TRea.   type ::= "real" ;
+TBoo.   type ::= "bool" ;
+TCha.   type ::= "char" ;
+Tid.    type ::= ID ;
 
-FunD.	fun_declaration ::= "fun" "ID" param_list ":" type "{" fun_block "}" ;
+FunD.   fun_declaration ::= "fun" ID param_list ":" type "{" fun_block "}" ;
 
-FunB.	fun_block ::= declarations fun_body ;
+FunB.   fun_block ::= declarations fun_body ;
 
-ParL.	param_list ::= "(" parameters ")" ;
+ParL.   param_list ::= "(" parameters ")" ;
 
-Para.	parameters ::= basic_declaration more_parameters ;
-ParaN.	parameters ::= ;
+Para.   parameters ::= basic_declaration more_parameters ;
+ParaN.  parameters ::= ;
 
-MPar.	more_parameters ::= "," basic_declaration more _parameters ;
-MParN.	more_parameters ::= ;
+MPar.   more_parameters ::= "," basic_declaration more_parameters ;
+MParN.  more_parameters ::= ;
 
-BDec.	basic_declaration ::= "ID" basic_array_dimensions ":" type ;
+BDec.   basic_declaration ::= ID basic_array_dimensions ":" type ;
 
-BArrD.	basic_array_dimensions ::= "[" "]" basic_array_dimensions ;
-BArrN.	basic_array_dimensions ::= ;
+BArrD.  basic_array_dimensions ::= "[" "]" basic_array_dimensions ;
+BArrN.  basic_array_dimensions ::= ;
 
-DatDec.	data_declaration ::= "DATA" "ID" ":=" cons_declarations ;
-ConDec.	cons_declaration ::= cons_decl more_cons_decl ;
+DatDec. data_declaration ::= "data" ID ":=" cons_declarations ;
+ConDec. cons_declaration ::= cons_decl more_cons_decl ;
 
-MConDc.	more_cons_decl ::= "/" cons_decl more_cons_decl ;
-MConNl.	more_cons_decl ::= ;
+MConDc. more_cons_decl ::= "|" cons_decl more_cons_decl ;
+MConNl. more_cons_decl ::= ;
 
-CnDecl.	cons_decl ::= "CID" "OF" type_list ;
-CnDec.	cons_decl ::= "CID" ;
+CnDecl. cons_decl ::= CID "of" type_list ;
+CnDec.  cons_decl ::= CID ;
 
-TpeLst.	type_list ::= type more_type ;
+TpeLst. type_list ::= type more_type ;
 
-MreTyp.	more_type ::= "*" type more_type;
-MrTypN.	more_type ::= ;
+MreTyp. more_type ::= "*" type more_type;
+MrTypN. more_type ::= ;
 
-PrgBdy.	program_body ::= "BEGIN" prog_stmts END ;
-PrgBd.	program_body ::= prog_stmts ;
+PrgBdy. program_body ::= "begin" prog_stmts "end" ;
+PrgBd.  program_body ::= prog_stmts ;
 
-FunBdy.	fun_body ::= "BEGIN" prog_stmts "RETURN" expr ";" "END" ;
-FunBd.	fun_body ::= prog_stmts "RETURN" expr ";" ;
+FunBdy. fun_body ::= "begin" prog_stmts "return" expr ";" "end" ;
+FunBd.  fun_body ::= prog_stmts "return" expr ";" ;
 
-PrgStm.	prog_stmts ::= prog_stmt ";" prog_stmts
-PrgSt.	prog_stmts ::= ;
+PrgStm. prog_stmts ::= prog_stmt ";" prog_stmts ;
+PrgSt.  prog_stmts ::= ;
 
-ProgIf.	prog_stmt ::= "IF" expr "THEN" prog_stmt "ELSE" prog_stmt ;
-ProgWh.	prog_stmt ::= "WHILE" expr "DO" prog_stmt ;
-ProgRd.	prog_stmt ::= "READ" location ;
-ProgAs.	prog_stmt ::= location ":=" expr ;
-ProgPt.	prog_stmt ::= "PRINT" expr ;
-progBl.	prog_stmt ::= "{" block "}" ;
-progCs.	prog_stmt ::= "CASE" expr "OF" "{" case_list "}" ;
+ProgIf. prog_stmt ::= "if" expr "then" prog_stmt "else" prog_stmt ;
+ProgWh. prog_stmt ::= "while" expr "do" prog_stmt ;
+ProgRd. prog_stmt ::= "read" location ;
+ProgAs. prog_stmt ::= location ":=" expr ;
+ProgPt. prog_stmt ::= "print" expr ;
+progBl. prog_stmt ::= "{" block "}" ;
+progCs. prog_stmt ::= "case" expr "of" "{" case_list "}" ;
 
-loca.	location ::= "ID" array_dimensions ;
+loca.   location ::= ID array_dimensions ;
 
-CseLst.	case_list ::= case more_case ;
+CseLst. case_list ::= case more_case ;
 
-MrCase.	more_case ::= "/" case more_case ;
-MrCasN.	more_case ::= ;
+MrCase. more_case ::= "|" case more_case ;
+MrCasN. more_case ::= ;
 
-Case.	case ::= "CID" var_list "->" prog_stmt ;
+Case.   case ::= CID var_list "=>" prog_stmt ;
 
-VarLst.	varList ::= "(" var_list1 ")" ;
+VarLst. varList ::= "(" var_list1 ")" ;
 VarLstN.varList ::= ;
 
-VarLst1.var_list1 ::= "ID" more_var_list1 ;
+VarLst1.var_list1 ::= ID more_var_list1 ;
 
-MVrLst1.more_var_list1 ::= "," "ID" more_var_list1 ;
+MVrLst1.more_var_list1 ::= "," ID more_var_list1 ;
 MVrLt1N.more_var_list1 ::= ;
  
-ExprE.	expr ::= expr "OR" bint_term ;
-ExprB.	expr ::= bint_term ;
+ExprE.  expr ::= expr "||" bint_term ;
+ExprB.  expr ::= bint_term ;
 
-BIntTrm.bint_term ::= bint_term "AND" bint_factor ;
+BIntTrm.bint_term ::= bint_term "&&" bint_factor ;
 BIntTmF.bint_term ::= bint_factor ;
 
-BIntFac.bint_factor ::= "NOT" bint_factor ;
+BIntFac.bint_factor ::= "not" bint_factor ;
 BIntFCm.bint_factor ::= int_expr compare_op int_expr ;
 BIntFcI.bint_factor ::= int_expr ;
 
-CmpOpEq.compare_op ::= "==" ;
+CmpOpEq.compare_op ::= "=" ;
 CmpOpLT.compare_op ::= "<" ;
 CmpOpGT.compare_op ::= ">" ;
 CmpOpLE.compare_op ::= "=<" ;
@@ -110,28 +117,29 @@ CmpOpGE.compare_op ::= ">=" ;
 
 IntExpE.int_expr ::= int_expr addop int_term ;
 IntExpT.int_expr ::= int_term ;
-'
-AddOp.	addop ::= "+" ;
-SubOp.	addop ::= "-" ;
+
+AddOp.  addop ::= "+" ;
+SubOp.  addop ::= "-" ;
 
 IntTrmT.int_term ::= int_term mulop int_factor ;
 IntTrmF.int_term ::= int_factor ;
 
-MulOp. mulop ::= "*" ;
-DivOp. mulop ::= "/" ;
+MulOp.  mulop ::= "*" ;
+DivOp.  mulop ::= "/" ;
 
 ItFcLPr.int_factor ::= "(" expr ")" ;
-ItFcSiz.int_factor ::= "SIZE" "(" "ID" basic_array_dimensions ")" ;
-ItFcFlt.int_factor ::= "FLOAT" "(" expr ")" ;
-ItFcFlr.int_factor ::= "FLOOR" "(" expr ")" ;
-ItFcCil.int_factor ::= "CEIL" "(" expr ")" ;
-ItFcID.	int_factor ::= "ID" modifier_list ;
+ItFcSiz.int_factor ::= "size" "(" ID basic_array_dimensions ")" ;
+ItFcFlt.int_factor ::= "float" "(" expr ")" ;
+ItFcFlr.int_factor ::= "floor" "(" expr ")" ;
+ItFcCil.int_factor ::= "ceil" "(" expr ")" ;
+ItFcID. int_factor ::= ID modifier_list ;
 ItFcCID.int_factor ::= cons_argument_list ;
-ItFcIVl.int_factor ::= "IVAL" ;
-ItFcRVl.int_factor ::= "RVAL" ;
-ItFcBVl.int_factor ::= "BVAL" ;
-ItFcCVl.int_factor ::= "CVAL" ;
-ItFcSub.int_factor ::= "SUB" int_factor ;
+ItFcIVl.int_factor ::= Integer ;
+ItFcRVl.int_factor ::= Double ;
+ItFcBVT.int_factor ::= "true" ;
+ItFcBVF.int_factor ::= "false" ;
+ItFcCVl.int_factor ::= Char ;
+ItFcSub.int_factor ::= "-" int_factor ;
 
 ModLstF.modifier_list ::= fun_argument_list ;
 ModLstA.modifier_list ::= array_dimensions ;
@@ -141,47 +149,9 @@ FArgLst.fun_argument_list ::= "(" arguments ")" ;
 CAgLstF.cons_argument_list ::= fun_argument_list ;
 CAgLstN.cons_argument_list ::= ;
 
-Args.	arguments ::= expr more_arguments ;
-ArgsN.	arguments ::= ;
+Args.   arguments ::= expr more_arguments ;
+ArgsN.  arguments ::= ;
 
-MArgs.	more_arguments ::= "," expr more_arguments ;
-MArgsN.	more_arguments ::= ;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	
- 
-
-
+MArgs.  more_arguments ::= "," expr more_arguments ;
+MArgsN. more_arguments ::= ;
 
