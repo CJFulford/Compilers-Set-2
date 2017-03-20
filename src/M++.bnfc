@@ -1,0 +1,157 @@
+comment "%" ;
+comment "/*" "*/" ;
+
+token CID ('#' ('_' | digit | letter)*) ;
+token ID (letter ('_' | digit | letter)*) ;
+
+
+Prg .   Prog ::= Block ;
+
+Blok.   Block ::= Declarations Program_body ;
+
+Dec.    Declarations ::= Declaration ";" Declarations ;
+DecN.   Declarations ::= ;
+
+DecV.   Declaration ::= Var_declaration ;
+DecF.   Declaration ::= Fun_declaration ;
+DecD.   Declaration ::= Data_declaration ;
+
+VarD.   Var_declaration ::= "var" Var_specs ":" Type ;
+
+VarS.   Var_specs ::= Var_spec More_var_specs ;
+
+MVarS.  More_var_specs ::= "," Var_spec More_var_specs ;
+MVar.   More_var_specs ::= ;
+
+VarSp.  Var_spec ::= Array_dimensions ;
+
+ArrDi.  Array_dimensions ::= "[" Expr "]" Array_dimensions ;
+ArrD.   Array_dimensions ::= ;
+
+TInt.   Type ::= "int" ;
+TRea.   Type ::= "real" ;
+TBoo.   Type ::= "bool" ;
+TCha.   Type ::= "char" ;
+Tid.    Type ::= ID ;
+
+FunD.   Fun_declaration ::= "fun" ID Param_list ":" Type "{" Fun_block "}" ;
+
+FunB.   Fun_block ::= Declarations Fun_body ;
+
+ParL.   Param_list ::= "(" Parameters ")" ;
+
+Para.   Parameters ::= Basic_declaration More_parameters ;
+ParaN.  Parameters ::= ;
+
+MPar.   More_parameters ::= "," Basic_declaration More_parameters ;
+MParN.  More_parameters ::= ;
+
+BDec.   Basic_declaration ::= ID Basic_array_dimensions ":" Type ;
+
+BArrD.  Basic_array_dimensions ::= "[" "]" Basic_array_dimensions ;
+BArrN.  Basic_array_dimensions ::= ;
+
+DatDec. Data_declaration ::= "data" ID ":=" Cons_declarations ;
+ConDec. Cons_declarations ::= Cons_decl More_cons_decl ;
+
+MConDc. More_cons_decl ::= "|" Cons_decl More_cons_decl ;
+MConNl. More_cons_decl ::= ;
+
+CnDecl. Cons_decl ::= CID "of" Type_list ;
+CnDec.  Cons_decl ::= CID ;
+
+TpeLst. Type_list ::= Type More_type ;
+
+MreTyp. More_type ::= "*" Type More_type;
+MrTypN. More_type ::= ;
+
+PrgBdy. Program_body ::= "begin" Prog_stmts "end" ;
+PrgBd.  Program_body ::= Prog_stmts ;
+
+FunBdy. Fun_body ::= "begin" Prog_stmts "return" Expr ";" "end" ;
+FunBd.  Fun_body ::= Prog_stmts "return" Expr ";" ;
+
+PrgStm. Prog_stmts ::= Prog_stmt ";" Prog_stmts ;
+PrgSt.  Prog_stmts ::= ;
+
+ProgIf. Prog_stmt ::= "if" Expr "then" Prog_stmt "else" Prog_stmt ;
+ProgWh. Prog_stmt ::= "while" Expr "do" Prog_stmt ;
+ProgRd. Prog_stmt ::= "read" Location ;
+ProgAs. Prog_stmt ::= Location ":=" Expr ;
+ProgPt. Prog_stmt ::= "print" Expr ;
+ProgBl. Prog_stmt ::= "{" Block "}" ;
+ProgCs. Prog_stmt ::= "case" Expr "of" "{" Case_list "}" ;
+
+Loca.   Location ::= ID Array_dimensions ;
+
+CseLst. Case_list ::= Case More_case ;
+
+MrCase. More_case ::= "|" Case More_case ;
+MrCasN. More_case ::= ;
+
+Cas.    Case ::= CID Var_list "=>" Prog_stmt ;
+
+VarLst. Var_list ::= "(" Var_list1 ")" ;
+VarLstN.Var_list ::= ;
+
+VarLst1.Var_list1 ::= ID More_var_list ;
+
+MVrLst. More_var_list ::= "," ID More_var_list ;
+MVrLtN. More_var_list ::= ;
+ 
+ExprE.  Expr ::= Expr "||" Bint_term ;
+ExprB.  Expr ::= Bint_term ;
+
+BIntTrm.Bint_term ::= Bint_term "&&" Bint_factor ;
+BIntTmF.Bint_term ::= Bint_factor ;
+
+BIntFac.Bint_factor ::= "not" Bint_factor ;
+BIntFCm.Bint_factor ::= Int_expr Compare_op Int_expr ;
+BIntFcI.Bint_factor ::= Int_expr ;
+
+CmpOpEq.Compare_op ::= "=" ;
+CmpOpLT.Compare_op ::= "<" ;
+CmpOpGT.Compare_op ::= ">" ;
+CmpOpLE.Compare_op ::= "=<" ;
+CmpOpGE.Compare_op ::= ">=" ;
+
+IntExpE.Int_expr ::= Int_expr Addop Int_term ;
+IntExpT.Int_expr ::= Int_term ;
+
+AddOp.  Addop ::= "+" ;
+SubOp.  Addop ::= "-" ;
+
+IntTrmT.Int_term ::= Int_term Mulop Int_factor ;
+IntTrmF.Int_term ::= Int_factor ;
+
+MulOp.  Mulop ::= "*" ;
+DivOp.  Mulop ::= "/" ;
+
+ItFcLPr.Int_factor ::= "(" Expr ")" ;
+ItFcSiz.Int_factor ::= "size" "(" ID Basic_array_dimensions ")" ;
+ItFcFlt.Int_factor ::= "float" "(" Expr ")" ;
+ItFcFlr.Int_factor ::= "floor" "(" Expr ")" ;
+ItFcCil.Int_factor ::= "ceil" "(" Expr ")" ;
+ItFcID. Int_factor ::= ID Modifier_list ;
+ItFcCID.Int_factor ::= Cons_argument_list ;
+ItFcIVl.Int_factor ::= Integer ;
+ItFcRVl.Int_factor ::= Double ;
+ItFcBVT.Int_factor ::= "true" ;
+ItFcBVF.Int_factor ::= "false" ;
+ItFcCVl.Int_factor ::= Char ;
+ItFcSub.Int_factor ::= "-" Int_factor ;
+
+ModLstF.Modifier_list ::= Fun_argument_list ;
+ModLstA.Modifier_list ::= Array_dimensions ;
+
+FArgLst.Fun_argument_list ::= "(" Arguments ")" ;
+
+CAgLstF.Cons_argument_list ::= Fun_argument_list ;
+CAgLstN.Cons_argument_list ::= ;
+
+Args.   Arguments ::= Expr More_arguments ;
+ArgsN.  Arguments ::= ;
+
+MArgs.  More_arguments ::= "," Expr More_arguments ;
+MArgsN. More_arguments ::= ;
+
