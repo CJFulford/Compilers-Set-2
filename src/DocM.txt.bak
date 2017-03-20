@@ -151,7 +151,7 @@ All other symbols are terminals.
   |  |  **|**  | ``floor`` ``(`` //Expr// ``)`` 
   |  |  **|**  | ``ceil`` ``(`` //Expr// ``)`` 
   |  |  **|**  | //ID// //Modifier_list// 
-  |  |  **|**  | //CID// //Cons_argument_list// 
+  |  |  **|**  | //Cons_argument_list// 
   |  |  **|**  | //Integer// 
   |  |  **|**  | //Double// 
   |  |  **|**  | ``true`` 

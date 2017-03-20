@@ -300,13 +300,13 @@ instance Print Int_factor where
     Int_factor4 expr -> prPrec i 0 (concatD [doc (showString "floor"), doc (showString "("), prt 0 expr, doc (showString ")")])
     Int_factor5 expr -> prPrec i 0 (concatD [doc (showString "ceil"), doc (showString "("), prt 0 expr, doc (showString ")")])
     Int_factor6 id modifierlist -> prPrec i 0 (concatD [prt 0 id, prt 0 modifierlist])
-    Int_factor7 cid consargumentlist -> prPrec i 0 (concatD [prt 0 cid, prt 0 consargumentlist])
+    Int_factorCons_argument_list consargumentlist -> prPrec i 0 (concatD [prt 0 consargumentlist])
     Int_factorInteger n -> prPrec i 0 (concatD [prt 0 n])
     Int_factorDouble d -> prPrec i 0 (concatD [prt 0 d])
     Int_factor_true -> prPrec i 0 (concatD [doc (showString "true")])
     Int_factor_false -> prPrec i 0 (concatD [doc (showString "false")])
     Int_factorChar c -> prPrec i 0 (concatD [prt 0 c])
-    Int_factor8 intfactor -> prPrec i 0 (concatD [doc (showString "-"), prt 0 intfactor])
+    Int_factor7 intfactor -> prPrec i 0 (concatD [doc (showString "-"), prt 0 intfactor])
 
 instance Print Modifier_list where
   prt i e = case e of

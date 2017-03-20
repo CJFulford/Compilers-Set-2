@@ -179,13 +179,13 @@ data Int_factor
     | Int_factor4 Expr
     | Int_factor5 Expr
     | Int_factor6 ID Modifier_list
-    | Int_factor7 CID Cons_argument_list
+    | Int_factorCons_argument_list Cons_argument_list
     | Int_factorInteger Integer
     | Int_factorDouble Double
     | Int_factor_true
     | Int_factor_false
     | Int_factorChar Char
-    | Int_factor8 Int_factor
+    | Int_factor7 Int_factor
   deriving (Eq, Ord, Show, Read)
 
 data Modifier_list

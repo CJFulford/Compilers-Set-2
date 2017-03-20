@@ -253,13 +253,13 @@ Int_factor : '(' Expr ')' { AbsM.Int_factor1 $2 }
            | 'floor' '(' Expr ')' { AbsM.Int_factor4 $3 }
            | 'ceil' '(' Expr ')' { AbsM.Int_factor5 $3 }
            | ID Modifier_list { AbsM.Int_factor6 $1 $2 }
-           | CID Cons_argument_list { AbsM.Int_factor7 $1 $2 }
+           | Cons_argument_list { AbsM.Int_factorCons_argument_list $1 }
            | Integer { AbsM.Int_factorInteger $1 }
            | Double { AbsM.Int_factorDouble $1 }
            | 'true' { AbsM.Int_factor_true }
            | 'false' { AbsM.Int_factor_false }
            | Char { AbsM.Int_factorChar $1 }
-           | '-' Int_factor { AbsM.Int_factor8 $2 }
+           | '-' Int_factor { AbsM.Int_factor7 $2 }
 Modifier_list :: { Modifier_list }
 Modifier_list : Fun_argument_list { AbsM.Modifier_listFun_argument_list $1 }
               | Array_dimensions { AbsM.Modifier_listArray_dimensions $1 }

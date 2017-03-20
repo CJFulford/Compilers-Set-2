@@ -5,153 +5,137 @@ token CID ('#' ('_' | digit | letter)*) ;
 token ID (letter ('_' | digit | letter)*) ;
 
 
-Prg .   Prog ::= Block ;
+rules   Prog ::= Block ;
 
-Blok.   Block ::= Declarations Program_body ;
+rules   Block ::= Declarations Program_body ;
 
-Dec.    Declarations ::= Declaration ";" Declarations ;
-DecN.   Declarations ::= ;
+rules   Declarations ::= Declaration ";" Declarations | ;
 
-DecV.   Declaration ::= Var_declaration ;
-DecF.   Declaration ::= Fun_declaration ;
-DecD.   Declaration ::= Data_declaration ;
+rules   Declaration ::= Var_declaration 
+                    | Fun_declaration 
+                    | Data_declaration ;
 
-VarD.   Var_declaration ::= "var" Var_specs ":" Type ;
+rules   Var_declaration ::= "var" Var_specs ":" Type ;
 
-VarS.   Var_specs ::= Var_spec More_var_specs ;
+rules   Var_specs ::= Var_spec More_var_specs ;
 
-MVarS.  More_var_specs ::= "," Var_spec More_var_specs ;
-MVar.   More_var_specs ::= ;
+rules   More_var_specs ::= "," Var_spec More_var_specs | ;
 
-VarSp.  Var_spec ::= Array_dimensions ;
+rules   Var_spec ::= Array_dimensions ;
 
-ArrDi.  Array_dimensions ::= "[" Expr "]" Array_dimensions ;
-ArrD.   Array_dimensions ::= ;
+rules   Array_dimensions ::= "[" Expr "]" Array_dimensions | ;
 
-TInt.   Type ::= "int" ;
-TRea.   Type ::= "real" ;
-TBoo.   Type ::= "bool" ;
-TCha.   Type ::= "char" ;
-Tid.    Type ::= ID ;
+rules   Type ::= "int"
+                | "real"
+                | "bool"
+                | "char"
+                | ID ;
 
-FunD.   Fun_declaration ::= "fun" ID Param_list ":" Type "{" Fun_block "}" ;
+rules   Fun_declaration ::= "fun" ID Param_list ":" Type "{" Fun_block "}" ;
 
-FunB.   Fun_block ::= Declarations Fun_body ;
+rules   Fun_block ::= Declarations Fun_body ;
 
-ParL.   Param_list ::= "(" Parameters ")" ;
+rules   Param_list ::= "(" Parameters ")" ;
 
-Para.   Parameters ::= Basic_declaration More_parameters ;
-ParaN.  Parameters ::= ;
+rules   Parameters ::= Basic_declaration More_parameters | ;
 
-MPar.   More_parameters ::= "," Basic_declaration More_parameters ;
-MParN.  More_parameters ::= ;
+rules   More_parameters ::= "," Basic_declaration More_parameters | ;
 
-BDec.   Basic_declaration ::= ID Basic_array_dimensions ":" Type ;
+rules   Basic_declaration ::= ID Basic_array_dimensions ":" Type ;
 
-BArrD.  Basic_array_dimensions ::= "[" "]" Basic_array_dimensions ;
-BArrN.  Basic_array_dimensions ::= ;
+rules   Basic_array_dimensions ::= "[" "]" Basic_array_dimensions | ;
 
-DatDec. Data_declaration ::= "data" ID ":=" Cons_declarations ;
-ConDec. Cons_declarations ::= Cons_decl More_cons_decl ;
+rules   Data_declaration ::= "data" ID ":=" Cons_declarations ;
 
-MConDc. More_cons_decl ::= "|" Cons_decl More_cons_decl ;
-MConNl. More_cons_decl ::= ;
+rules   Cons_declarations ::= Cons_decl More_cons_decl ;
 
-CnDecl. Cons_decl ::= CID "of" Type_list ;
-CnDec.  Cons_decl ::= CID ;
+rules   More_cons_decl ::= "|" Cons_decl More_cons_decl | ;
 
-TpeLst. Type_list ::= Type More_type ;
+rules   Cons_decl ::= CID "of" Type_list
+                    | CID ;
 
-MreTyp. More_type ::= "*" Type More_type;
-MrTypN. More_type ::= ;
+rules   Type_list ::= Type More_type ;
 
-PrgBdy. Program_body ::= "begin" Prog_stmts "end" ;
-PrgBd.  Program_body ::= Prog_stmts ;
+rules   More_type ::= "*" Type More_type | ;
 
-FunBdy. Fun_body ::= "begin" Prog_stmts "return" Expr ";" "end" ;
-FunBd.  Fun_body ::= Prog_stmts "return" Expr ";" ;
+rules   Program_body ::= "begin" Prog_stmts "end"
+                        | Prog_stmts ;
 
-PrgStm. Prog_stmts ::= Prog_stmt ";" Prog_stmts ;
-PrgSt.  Prog_stmts ::= ;
+rules   Fun_body ::= "begin" Prog_stmts "return" Expr ";" "end"
+                    | Prog_stmts "return" Expr ";" ;
 
-ProgIf. Prog_stmt ::= "if" Expr "then" Prog_stmt "else" Prog_stmt ;
-ProgWh. Prog_stmt ::= "while" Expr "do" Prog_stmt ;
-ProgRd. Prog_stmt ::= "read" Location ;
-ProgAs. Prog_stmt ::= Location ":=" Expr ;
-ProgPt. Prog_stmt ::= "print" Expr ;
-ProgBl. Prog_stmt ::= "{" Block "}" ;
-ProgCs. Prog_stmt ::= "case" Expr "of" "{" Case_list "}" ;
+rules   Prog_stmts ::= Prog_stmt ";" Prog_stmts | ;
 
-Loca.   Location ::= ID Array_dimensions ;
+rules   Prog_stmt ::= "if" Expr "then" Prog_stmt "else" Prog_stmt
+                    | "while" Expr "do" Prog_stmt
+                    | "read" Location
+                    | Location ":=" Expr
+                    | "print" Expr
+                    | "{" Block "}"
+                    | "case" Expr "of" "{" Case_list "}" ;
 
-CseLst. Case_list ::= Case More_case ;
+rules   Location ::= ID Array_dimensions ;
 
-MrCase. More_case ::= "|" Case More_case ;
-MrCasN. More_case ::= ;
+rules   Case_list ::= Case More_case ;
 
-Cas.    Case ::= CID Var_list "=>" Prog_stmt ;
+rules   More_case ::= "|" Case More_case | ;
 
-VarLst. Var_list ::= "(" Var_list1 ")" ;
-VarLstN.Var_list ::= ;
+rules   Case ::= CID Var_list "=>" Prog_stmt ;
 
-VarLst1.Var_list1 ::= ID More_var_list ;
+rules   Var_list ::= "(" Var_list1 ")" | ;
 
-MVrLst. More_var_list ::= "," ID More_var_list ;
-MVrLtN. More_var_list ::= ;
+rules   Var_list1 ::= ID More_var_list ;
+
+rules   More_var_list ::= "," ID More_var_list | ;
  
-ExprE.  Expr ::= Expr "||" Bint_term ;
-ExprB.  Expr ::= Bint_term ;
+rules   Expr ::= Expr "||" Bint_term
+            | Bint_term ;
 
-BIntTrm.Bint_term ::= Bint_term "&&" Bint_factor ;
-BIntTmF.Bint_term ::= Bint_factor ;
+rules   Bint_term ::= Bint_term "&&" Bint_factor
+                    | Bint_factor ;
 
-BIntFac.Bint_factor ::= "not" Bint_factor ;
-BIntFCm.Bint_factor ::= Int_expr Compare_op Int_expr ;
-BIntFcI.Bint_factor ::= Int_expr ;
+rules   Bint_factor ::= "not" Bint_factor
+                    | Int_expr Compare_op Int_expr
+                    | Int_expr ;
 
-CmpOpEq.Compare_op ::= "=" ;
-CmpOpLT.Compare_op ::= "<" ;
-CmpOpGT.Compare_op ::= ">" ;
-CmpOpLE.Compare_op ::= "=<" ;
-CmpOpGE.Compare_op ::= ">=" ;
+rules   Compare_op ::= "="
+                    | "<"
+                    | ">"
+                    | "=<"
+                    | ">=" ;
 
-IntExpE.Int_expr ::= Int_expr Addop Int_term ;
-IntExpT.Int_expr ::= Int_term ;
+rules   Int_expr ::= Int_expr Addop Int_term
+                    | Int_term ;
 
-AddOp.  Addop ::= "+" ;
-SubOp.  Addop ::= "-" ;
+rules   Addop ::= "+" | "-" ;
 
-IntTrmT.Int_term ::= Int_term Mulop Int_factor ;
-IntTrmF.Int_term ::= Int_factor ;
+rules   Int_term ::= Int_term Mulop Int_factor
+                | Int_factor ;
 
-MulOp.  Mulop ::= "*" ;
-DivOp.  Mulop ::= "/" ;
+rules   Mulop ::= "*" | "/" ;
 
-ItFcLPr.Int_factor ::= "(" Expr ")" ;
-ItFcSiz.Int_factor ::= "size" "(" ID Basic_array_dimensions ")" ;
-ItFcFlt.Int_factor ::= "float" "(" Expr ")" ;
-ItFcFlr.Int_factor ::= "floor" "(" Expr ")" ;
-ItFcCil.Int_factor ::= "ceil" "(" Expr ")" ;
-ItFcID. Int_factor ::= ID Modifier_list ;
-ItFcCID.Int_factor ::= Cons_argument_list ;
-ItFcIVl.Int_factor ::= Integer ;
-ItFcRVl.Int_factor ::= Double ;
-ItFcBVT.Int_factor ::= "true" ;
-ItFcBVF.Int_factor ::= "false" ;
-ItFcCVl.Int_factor ::= Char ;
-ItFcSub.Int_factor ::= "-" Int_factor ;
+rules   Int_factor ::= "(" Expr ")"
+                    | "size" "(" ID Basic_array_dimensions ")" 
+                    | "float" "(" Expr ")"
+                    | "floor" "(" Expr ")"
+                    | "ceil" "(" Expr ")"
+                    | ID Modifier_list
+                    | CID Cons_argument_list
+                    | Integer
+                    | Double
+                    | "true"
+                    | "false"
+                    | Char
+                    | "-" Int_factor ;
 
-ModLstF.Modifier_list ::= Fun_argument_list ;
-ModLstA.Modifier_list ::= Array_dimensions ;
+rules   Modifier_list ::= Fun_argument_list 
+                    | Array_dimensions ;
 
-FArgLst.Fun_argument_list ::= "(" Arguments ")" ;
+rules   Fun_argument_list ::= "(" Arguments ")" ;
 
-CAgLstF.Cons_argument_list ::= Fun_argument_list ;
-CAgLstN.Cons_argument_list ::= ;
+rules   Cons_argument_list ::= Fun_argument_list | ;
 
-Args.   Arguments ::= Expr More_arguments ;
-ArgsN.  Arguments ::= ;
+rules   Arguments ::= Expr More_arguments | ;
 
-MArgs.  More_arguments ::= "," Expr More_arguments ;
-MArgsN. More_arguments ::= ;
+rules   More_arguments ::= "," Expr More_arguments | ;
 
