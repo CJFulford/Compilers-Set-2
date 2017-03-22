@@ -54,7 +54,7 @@ transDeclarations x = case x of
 
 transDeclaration :: Declaration -> A.M_decl
 transDeclaration x = case x of
-  DeclarationVar_declaration vardeclaration -> transVar_declaration vardeclaraton
+  DeclarationVar_declaration vardeclaration -> transVar_declaration vardeclaration
   DeclarationFun_declaration fundeclaration -> transFun_declaration funDeclaration
   DeclarationData_declaration datadeclaration -> transData_declaration datadeclaration
 
@@ -92,7 +92,7 @@ transFun_declaration :: Fun_declaration -> A.M_fun
 transFun_declaration x = case x of
   Fun_declaration1 id paramlist type_ funblock -> (transID id, transParam_list paramlist, transType type_, transFun_block block)
 
-transFun_block :: Fun_block -> [M_decl],[M_stmt])
+transFun_block :: Fun_block -> ([M_decl],[M_stmt])
 transFun_block x = case x of
   Fun_block1 declarations funbody -> (transDeclarations declarations, transFun_body funbody)
 
@@ -166,7 +166,7 @@ transProg_stmt x = case x of
   Prog_stmt1 expr progstmt1 progstmt2 -> A.M_cond (transExpr expr) (transProg_stmt progstmt1) (transProg_stmt progstmt2)
   Prog_stmt2 expr progstmt -> A.M_while (transExpr expr) (transProg_stmt progstmt)
   Prog_stmt3 location -> A.M_print (transLocation location)
-  Prog_stmt4 location expr -> A,M_read (transLocation location) (transExpr expr)
+  Prog_stmt4 location expr -> A.M_read (transLocation location) (transExpr expr)
   Prog_stmt5 expr -> A.M_return (transExpr expr)
   Prog_stmt6 block -> A.M_block (transBlock block)
   Prog_stmt7 expr caselist -> A.M_case (transExpr expr) (transCase_list caselist)

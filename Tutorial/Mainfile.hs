@@ -1,10 +1,10 @@
 module Main where
 
-import LexM
-import ParM
-import AbsM
-import SkelM
+import LexExpr
+import ParExpr
+import AbsExpr
 import AST 
+import ASTConv
 import ErrM -- to show
 
 import System.Environment

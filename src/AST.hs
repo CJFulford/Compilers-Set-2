@@ -21,7 +21,7 @@ data M_type = M_int
             | M_bool 
             | M_real 
             | M_char 
-            | M_type of string
+            | String
            deriving (Eq,Show)
             
 data M_expr = M_ival Int
@@ -37,7 +37,7 @@ data M_operation = M_fn String
             | M_cid String
             | M_add | M_mul | M_sub | M_div | M_neg
             | M_lt  | M_le  | M_gt  | M_ge  | M_eq  | M_not | M_and | M_or
-            | M_float | M_floor | M_ceil;
+            | M_float | M_floor | M_ceil
            deriving (Eq,Show)
 
 
