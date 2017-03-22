@@ -9,6 +9,10 @@ module AbsM where
 
 newtype CID = CID String deriving (Eq, Ord, Show, Read)
 newtype ID = ID String deriving (Eq, Ord, Show, Read)
+newtype RVAL = RVAL String deriving (Eq, Ord, Show, Read)
+newtype IVAL = IVAL String deriving (Eq, Ord, Show, Read)
+newtype BVAL = BVAL String deriving (Eq, Ord, Show, Read)
+newtype CVAL = CVAL String deriving (Eq, Ord, Show, Read)
 data Prog = ProgBlock Block
   deriving (Eq, Ord, Show, Read)
 
@@ -35,7 +39,7 @@ data More_var_specs
     = More_var_specs1 Var_spec More_var_specs | More_var_specs2
   deriving (Eq, Ord, Show, Read)
 
-data Var_spec = Var_specArray_dimensions Array_dimensions
+data Var_spec = Var_spec1 ID Array_dimensions
   deriving (Eq, Ord, Show, Read)
 
 data Array_dimensions
@@ -180,11 +184,10 @@ data Int_factor
     | Int_factor5 Expr
     | Int_factor6 ID Modifier_list
     | Int_factor7 CID Cons_argument_list
-    | Int_factorInteger Integer
-    | Int_factorDouble Double
-    | Int_factor_true
-    | Int_factor_false
-    | Int_factorChar Char
+    | Int_factorIVAL IVAL
+    | Int_factorRVAL RVAL
+    | Int_factorBVAL BVAL
+    | Int_factorCVAL CVAL
     | Int_factor8 Int_factor
   deriving (Eq, Ord, Show, Read)
 

@@ -3,6 +3,10 @@ comment "/*" "*/" ;
 
 token CID ('#' ('_' | digit | letter)*) ;
 token ID (letter ('_' | digit | letter)*) ;
+token RVAL (digit '.' digit digit*) ;
+token IVAL (digit digit*) ;
+token BVAL (('t''r''u''e') | ('f''a''l''s''e')) ;
+token CVAL (('"' char '"') | ('"' '\n' '"') | ('"' '\t' '"')) ;
 
 
 rules   Prog ::= Block ;
@@ -21,7 +25,7 @@ rules   Var_specs ::= Var_spec More_var_specs ;
 
 rules   More_var_specs ::= "," Var_spec More_var_specs | ;
 
-rules   Var_spec ::= Array_dimensions ;
+rules   Var_spec ::= ID Array_dimensions ;
 
 rules   Array_dimensions ::= "[" Expr "]" Array_dimensions | ;
 
@@ -121,11 +125,10 @@ rules   Int_factor ::= "(" Expr ")"
                     | "ceil" "(" Expr ")"
                     | ID Modifier_list
                     | CID Cons_argument_list
-                    | Integer
-                    | Double
-                    | "true"
-                    | "false"
-                    | Char
+                    | IVAL
+                    | RVAL
+                    | BVAL
+                    | CVAL
                     | "-" Int_factor ;
 
 rules   Modifier_list ::= Fun_argument_list 

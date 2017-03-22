@@ -9,6 +9,10 @@ module AbsM where
 
 newtype CID = CID String deriving (Eq, Ord, Show, Read)
 newtype ID = ID String deriving (Eq, Ord, Show, Read)
+newtype RVAL = RVAL String deriving (Eq, Ord, Show, Read)
+newtype IVAL = IVAL String deriving (Eq, Ord, Show, Read)
+newtype BVAL = BVAL String deriving (Eq, Ord, Show, Read)
+newtype CVAL = CVAL String deriving (Eq, Ord, Show, Read)
 data Prog = ProgBlock Block
   deriving (Eq, Ord, Show, Read)
 
@@ -35,7 +39,7 @@ data More_var_specs
     = More_var_specs1 Var_spec More_var_specs | More_var_specs2
   deriving (Eq, Ord, Show, Read)
 
-data Var_spec = Var_specArray_dimensions Array_dimensions
+data Var_spec = Var_spec1 ID Array_dimensions
   deriving (Eq, Ord, Show, Read)
 
 data Array_dimensions
@@ -131,10 +135,6 @@ data Var_list
     = Var_list1 Var_list | Var_list2 | Var_list11 ID More_var_list
   deriving (Eq, Ord, Show, Read)
 
-data More_var_list
-    = More_var_list1 ID More_var_list | More_var_list2
-  deriving (Eq, Ord, Show, Read)
-
 data Expr = Expr1 Expr Bint_term | ExprBint_term Bint_term
   deriving (Eq, Ord, Show, Read)
 
@@ -179,13 +179,12 @@ data Int_factor
     | Int_factor4 Expr
     | Int_factor5 Expr
     | Int_factor6 ID Modifier_list
-    | Int_factorCons_argument_list Cons_argument_list
-    | Int_factorInteger Integer
-    | Int_factorDouble Double
-    | Int_factor_true
-    | Int_factor_false
-    | Int_factorChar Char
-    | Int_factor7 Int_factor
+    | Int_factor7 CID Cons_argument_list
+    | Int_factorIVAL IVAL
+    | Int_factorRVAL RVAL
+    | Int_factorBVAL BVAL
+    | Int_factorCVAL CVAL
+    | Int_factor8 Int_factor
   deriving (Eq, Ord, Show, Read)
 
 data Modifier_list

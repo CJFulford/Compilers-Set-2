@@ -87,6 +87,22 @@ instance Print ID where
   prt _ (ID i) = doc (showString ( i))
 
 
+instance Print RVAL where
+  prt _ (RVAL i) = doc (showString ( i))
+
+
+instance Print IVAL where
+  prt _ (IVAL i) = doc (showString ( i))
+
+
+instance Print BVAL where
+  prt _ (BVAL i) = doc (showString ( i))
+
+
+instance Print CVAL where
+  prt _ (CVAL i) = doc (showString ( i))
+
+
 
 instance Print Prog where
   prt i e = case e of
@@ -122,7 +138,7 @@ instance Print More_var_specs where
 
 instance Print Var_spec where
   prt i e = case e of
-    Var_specArray_dimensions arraydimensions -> prPrec i 0 (concatD [prt 0 arraydimensions])
+    Var_spec1 id arraydimensions -> prPrec i 0 (concatD [prt 0 id, prt 0 arraydimensions])
 
 instance Print Array_dimensions where
   prt i e = case e of
@@ -241,12 +257,7 @@ instance Print Var_list where
   prt i e = case e of
     Var_list1 varlist -> prPrec i 0 (concatD [doc (showString "("), prt 1 varlist, doc (showString ")")])
     Var_list2 -> prPrec i 0 (concatD [])
-    Var_list11 id morevarlist -> prPrec i 1 (concatD [prt 0 id, prt 0 morevarlist])
-
-instance Print More_var_list where
-  prt i e = case e of
-    More_var_list1 id morevarlist -> prPrec i 0 (concatD [doc (showString ","), prt 0 id, prt 0 morevarlist])
-    More_var_list2 -> prPrec i 0 (concatD [])
+    Var_list11 id morevarlist -> prPrec i 1 (concatD [prt 0 id, prt 1 morevarlist])
 
 instance Print Expr where
   prt i e = case e of
@@ -300,13 +311,12 @@ instance Print Int_factor where
     Int_factor4 expr -> prPrec i 0 (concatD [doc (showString "floor"), doc (showString "("), prt 0 expr, doc (showString ")")])
     Int_factor5 expr -> prPrec i 0 (concatD [doc (showString "ceil"), doc (showString "("), prt 0 expr, doc (showString ")")])
     Int_factor6 id modifierlist -> prPrec i 0 (concatD [prt 0 id, prt 0 modifierlist])
-    Int_factorCons_argument_list consargumentlist -> prPrec i 0 (concatD [prt 0 consargumentlist])
-    Int_factorInteger n -> prPrec i 0 (concatD [prt 0 n])
-    Int_factorDouble d -> prPrec i 0 (concatD [prt 0 d])
-    Int_factor_true -> prPrec i 0 (concatD [doc (showString "true")])
-    Int_factor_false -> prPrec i 0 (concatD [doc (showString "false")])
-    Int_factorChar c -> prPrec i 0 (concatD [prt 0 c])
-    Int_factor7 intfactor -> prPrec i 0 (concatD [doc (showString "-"), prt 0 intfactor])
+    Int_factor7 cid consargumentlist -> prPrec i 0 (concatD [prt 0 cid, prt 0 consargumentlist])
+    Int_factorIVAL ival -> prPrec i 0 (concatD [prt 0 ival])
+    Int_factorRVAL rval -> prPrec i 0 (concatD [prt 0 rval])
+    Int_factorBVAL bval -> prPrec i 0 (concatD [prt 0 bval])
+    Int_factorCVAL cval -> prPrec i 0 (concatD [prt 0 cval])
+    Int_factor8 intfactor -> prPrec i 0 (concatD [doc (showString "-"), prt 0 intfactor])
 
 instance Print Modifier_list where
   prt i e = case e of

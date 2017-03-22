@@ -88,42 +88,42 @@ import ErrM
   'do' { PT _ (TS _ 26) }
   'else' { PT _ (TS _ 27) }
   'end' { PT _ (TS _ 28) }
-  'false' { PT _ (TS _ 29) }
-  'float' { PT _ (TS _ 30) }
-  'floor' { PT _ (TS _ 31) }
-  'fun' { PT _ (TS _ 32) }
-  'if' { PT _ (TS _ 33) }
-  'int' { PT _ (TS _ 34) }
-  'not' { PT _ (TS _ 35) }
-  'of' { PT _ (TS _ 36) }
-  'print' { PT _ (TS _ 37) }
-  'read' { PT _ (TS _ 38) }
-  'real' { PT _ (TS _ 39) }
-  'return' { PT _ (TS _ 40) }
-  'size' { PT _ (TS _ 41) }
-  'then' { PT _ (TS _ 42) }
-  'true' { PT _ (TS _ 43) }
-  'var' { PT _ (TS _ 44) }
-  'while' { PT _ (TS _ 45) }
-  '{' { PT _ (TS _ 46) }
-  '|' { PT _ (TS _ 47) }
-  '||' { PT _ (TS _ 48) }
-  '}' { PT _ (TS _ 49) }
+  'float' { PT _ (TS _ 29) }
+  'floor' { PT _ (TS _ 30) }
+  'fun' { PT _ (TS _ 31) }
+  'if' { PT _ (TS _ 32) }
+  'int' { PT _ (TS _ 33) }
+  'not' { PT _ (TS _ 34) }
+  'of' { PT _ (TS _ 35) }
+  'print' { PT _ (TS _ 36) }
+  'read' { PT _ (TS _ 37) }
+  'real' { PT _ (TS _ 38) }
+  'return' { PT _ (TS _ 39) }
+  'size' { PT _ (TS _ 40) }
+  'then' { PT _ (TS _ 41) }
+  'var' { PT _ (TS _ 42) }
+  'while' { PT _ (TS _ 43) }
+  '{' { PT _ (TS _ 44) }
+  '|' { PT _ (TS _ 45) }
+  '||' { PT _ (TS _ 46) }
+  '}' { PT _ (TS _ 47) }
 
-L_integ  { PT _ (TI $$) }
-L_doubl  { PT _ (TD $$) }
-L_charac { PT _ (TC $$) }
 L_CID { PT _ (T_CID $$) }
 L_ID { PT _ (T_ID $$) }
+L_RVAL { PT _ (T_RVAL $$) }
+L_IVAL { PT _ (T_IVAL $$) }
+L_BVAL { PT _ (T_BVAL $$) }
+L_CVAL { PT _ (T_CVAL $$) }
 
 
 %%
 
-Integer :: { Integer } : L_integ  { (read ( $1)) :: Integer }
-Double  :: { Double }  : L_doubl  { (read ( $1)) :: Double }
-Char    :: { Char }    : L_charac { (read ( $1)) :: Char }
 CID    :: { CID} : L_CID { CID ($1)}
 ID    :: { ID} : L_ID { ID ($1)}
+RVAL    :: { RVAL} : L_RVAL { RVAL ($1)}
+IVAL    :: { IVAL} : L_IVAL { IVAL ($1)}
+BVAL    :: { BVAL} : L_BVAL { BVAL ($1)}
+CVAL    :: { CVAL} : L_CVAL { CVAL ($1)}
 
 Prog :: { Prog }
 Prog : Block { AbsM.ProgBlock $1 }
@@ -144,7 +144,7 @@ More_var_specs :: { More_var_specs }
 More_var_specs : ',' Var_spec More_var_specs { AbsM.More_var_specs1 $2 $3 }
                | {- empty -} { AbsM.More_var_specs2 }
 Var_spec :: { Var_spec }
-Var_spec : Array_dimensions { AbsM.Var_specArray_dimensions $1 }
+Var_spec : ID Array_dimensions { AbsM.Var_spec1 $1 $2 }
 Array_dimensions :: { Array_dimensions }
 Array_dimensions : '[' Expr ']' Array_dimensions { AbsM.Array_dimensions1 $2 $4 }
                  | {- empty -} { AbsM.Array_dimensions2 }
@@ -254,11 +254,10 @@ Int_factor : '(' Expr ')' { AbsM.Int_factor1 $2 }
            | 'ceil' '(' Expr ')' { AbsM.Int_factor5 $3 }
            | ID Modifier_list { AbsM.Int_factor6 $1 $2 }
            | CID Cons_argument_list { AbsM.Int_factor7 $1 $2 }
-           | Integer { AbsM.Int_factorInteger $1 }
-           | Double { AbsM.Int_factorDouble $1 }
-           | 'true' { AbsM.Int_factor_true }
-           | 'false' { AbsM.Int_factor_false }
-           | Char { AbsM.Int_factorChar $1 }
+           | IVAL { AbsM.Int_factorIVAL $1 }
+           | RVAL { AbsM.Int_factorRVAL $1 }
+           | BVAL { AbsM.Int_factorBVAL $1 }
+           | CVAL { AbsM.Int_factorCVAL $1 }
            | '-' Int_factor { AbsM.Int_factor8 $2 }
 Modifier_list :: { Modifier_list }
 Modifier_list : Fun_argument_list { AbsM.Modifier_listFun_argument_list $1 }
