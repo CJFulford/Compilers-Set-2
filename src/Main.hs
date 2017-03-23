@@ -15,11 +15,11 @@ main = do
     fConts <- readFile fname
     let
         tokens = myLexer fConts
-        pTree  = pExpr tokens
+        pTree  = pProg tokens
     case pTree of 
         Ok rpTree -> do 
             let 
-               ast = transExpr rpTree
+               ast = transProg rpTree
             putStrLn $ "\n\n" ++ show ast  ++ "\n\n"
         Bad s -> error $ "Error in parsing: " ++ s 
     

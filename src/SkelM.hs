@@ -20,19 +20,20 @@ transID :: ID -> String
 transID x = case x of
   ID string -> string
   
-transRVAL :: RVAL -> String
+transRVAL :: RVAL -> Float  
 transRVAL x = case x of
-  RVAL string -> string
+  RVAL string -> (read string :: Float)
 
-transIVAL :: IVAL -> String
+transIVAL :: IVAL -> Int
 transIVAL x = case x of
-  IVAL string -> string
+  IVAL string -> (read string :: Int)
 
-transBVAL :: BVAL -> String
+transBVAL :: BVAL -> Bool
 transBVAL x = case x of
-  BVAL string -> string
+  BVAL "true" -> True
+  BVAL "false" -> False
 
-transCVAL :: CVAL ->String
+transCVAL :: CVAL -> String
 transCVAL x = case x of
   CVAL string -> string
   
@@ -41,7 +42,7 @@ transCVAL x = case x of
 -- beginnning of program
 transProg :: Prog -> A.M_prog
 transProg x = case x of
-  ProgBlock block -> transBlock block
+  ProgBlock block -> A.M_prog (transBlock block)
 
 transBlock :: Block -> ([A.M_decl],[A.M_stmt])
 transBlock x = case x of
@@ -55,25 +56,29 @@ transDeclarations x = case x of
 transDeclaration :: Declaration -> A.M_decl
 transDeclaration x = case x of
   DeclarationVar_declaration vardeclaration -> transVar_declaration vardeclaration
-  DeclarationFun_declaration fundeclaration -> transFun_declaration funDeclaration
+  DeclarationFun_declaration fundeclaration -> transFun_declaration fundeclaration
   DeclarationData_declaration datadeclaration -> transData_declaration datadeclaration
 
-transVar_declaration :: Var_declaration -> A.M_var
+transVar_declaration :: Var_declaration -> A.M_decl
 transVar_declaration x = case x of
-  Var_declaration1 varspecs type_ -> A.M_var (transVar_specs varspecs) (transType type_)
+  Var_declaration1 varspecs type_ -> A.M_var (x,y,z) where 
+        (x,y) = transVar_specs varspecs
+        z = transType type_
 
 transVar_specs :: Var_specs -> (String,[A.M_expr])
 transVar_specs x = case x of
-  Var_specs1 varspec morevarspecs -> (transVar_spec varspec):(transMore_var_specs morevarspecs)
+  Var_specs1 varspec morevarspecs -> (x,y++z) where 
+        (x,y) = transVar_spec varspec
+        z = transMore_var_specs morevarspecs
 
 transMore_var_specs :: More_var_specs -> [A.M_expr]
 transMore_var_specs x = case x of
-  More_var_specs1 varspec morevarspecs -> (transVar_spec varspec):(transMore_var_specs morevarspecs)
+  More_var_specs1 varspec morevarspecs -> (A.M_id (transVar_spec varspec)):(transMore_var_specs morevarspecs)
   More_var_specs2 -> []
 
-transVar_spec :: Var_spec -> A.M_expr
+transVar_spec :: Var_spec -> (String, [A.M_expr])
 transVar_spec x = case x of
-  Var_spec1 id arraydimensions -> A.M_id (transID id, transArray_dimensions arraydimensions)
+  Var_spec1 id arraydimensions -> (transID id, transArray_dimensions arraydimensions)
 
 transArray_dimensions :: Array_dimensions -> [A.M_expr]
 transArray_dimensions x = case x of
@@ -86,13 +91,15 @@ transType x = case x of
   Type_real -> A.M_real
   Type_bool -> A.M_bool
   Type_char -> A.M_char
-  TypeID id -> transID id
+  TypeID id -> A.M_tid (transID id)
 
-transFun_declaration :: Fun_declaration -> A.M_fun
+transFun_declaration :: Fun_declaration -> A.M_decl
 transFun_declaration x = case x of
-  Fun_declaration1 id paramlist type_ funblock -> (transID id, transParam_list paramlist, transType type_, transFun_block block)
+  Fun_declaration1 id paramlist type_ funblock -> A.M_fun 
+    (transID id, transParam_list paramlist, transType type_, x, y) where
+        (x,y) = transFun_block funblock
 
-transFun_block :: Fun_block -> ([M_decl],[M_stmt])
+transFun_block :: Fun_block -> ([A.M_decl], [A.M_stmt])
 transFun_block x = case x of
   Fun_block1 declarations funbody -> (transDeclarations declarations, transFun_body funbody)
 
@@ -102,7 +109,7 @@ transParam_list x = case x of
 
 transParameters :: Parameters -> [(String,Int,A.M_type)]
 transParameters x = case x of
-  Parameters1 basicdeclaration moreparameters -> (transBasic_declaration basicdecaration):(transMore_parameters moreparameters)
+  Parameters1 basicdeclaration moreparameters -> (transBasic_declaration basicdeclaration):(transMore_parameters moreparameters)
   Parameters2 -> []
 
 transMore_parameters :: More_parameters -> [(String,Int,A.M_type)]
@@ -119,9 +126,9 @@ transBasic_array_dimensions x = case x of
   Basic_array_dimensions1 basicarraydimensions -> 1 + (transBasic_array_dimensions basicarraydimensions)
   Basic_array_dimensions2 -> 0
 
-transData_declaration :: Data_declaration -> A.M_data
+transData_declaration :: Data_declaration -> A.M_decl
 transData_declaration x = case x of
-  Data_declaration1 id consdeclarations -> (transID id, transCons_declarations consdelarations)
+  Data_declaration1 id consdeclarations -> A.M_data (transID id, transCons_declarations consdeclarations)
 
 transCons_declarations :: Cons_declarations -> [(String,[A.M_type])]
 transCons_declarations x = case x of
@@ -134,7 +141,7 @@ transMore_cons_decl x = case x of
 
 transCons_decl :: Cons_decl -> (String,[A.M_type])
 transCons_decl x = case x of
-  Cons_decl1 cid typelist -> (transCID cid, transType_list type_)
+  Cons_decl1 cid typelist -> (transCID cid, transType_list typelist)
   Cons_declCID cid -> (transCID cid, [])
 
 transType_list :: Type_list -> [A.M_type]
@@ -153,8 +160,8 @@ transProgram_body x = case x of
 
 transFun_body :: Fun_body -> [A.M_stmt]
 transFun_body x = case x of
-  Fun_body1 progstmts expr -> (transProg_stmts progstmts):(transExpr expr)
-  Fun_body2 progstmts expr -> (transProg_stmts progstmts):(transExpr expr)
+  Fun_body1 progstmts expr -> (transProg_stmts progstmts)++[A.M_return (transExpr expr)]
+  Fun_body2 progstmts expr -> (transProg_stmts progstmts)++[A.M_return (transExpr expr)]
 
 transProg_stmts :: Prog_stmts -> [A.M_stmt]
 transProg_stmts x = case x of
@@ -163,17 +170,19 @@ transProg_stmts x = case x of
 
 transProg_stmt :: Prog_stmt -> A.M_stmt
 transProg_stmt x = case x of
-  Prog_stmt1 expr progstmt1 progstmt2 -> A.M_cond (transExpr expr) (transProg_stmt progstmt1) (transProg_stmt progstmt2)
-  Prog_stmt2 expr progstmt -> A.M_while (transExpr expr) (transProg_stmt progstmt)
-  Prog_stmt3 location -> A.M_print (transLocation location)
-  Prog_stmt4 location expr -> A.M_read (transLocation location) (transExpr expr)
+  Prog_stmt1 expr progstmt1 progstmt2 -> A.M_cond (transExpr expr, transProg_stmt progstmt1, transProg_stmt progstmt2)
+  Prog_stmt2 expr progstmt -> A.M_while (transExpr expr, transProg_stmt progstmt)
+  Prog_stmt3 location -> A.M_print (A.M_id (transLocation location))
+  Prog_stmt4 location expr -> A.M_read (x, y++[z]) where
+                            (x, y) = transLocation location
+                            z = transExpr expr
   Prog_stmt5 expr -> A.M_return (transExpr expr)
   Prog_stmt6 block -> A.M_block (transBlock block)
-  Prog_stmt7 expr caselist -> A.M_case (transExpr expr) (transCase_list caselist)
+  Prog_stmt7 expr caselist -> A.M_case (transExpr expr, transCase_list caselist)
 
-transLocation :: Location -> String
+transLocation :: Location -> (String,[A.M_expr])
 transLocation x = case x of
-  Location1 id arraydimensions -> (transID id) (transArray_dimensions arraydimensions)
+  Location1 id arraydimensions -> (transID id, transArray_dimensions arraydimensions)
 
 transCase_list :: Case_list -> [(String,[String],A.M_stmt)]
 transCase_list x = case x of
@@ -201,19 +210,19 @@ transMore_var_list x = case x of
 
 transExpr :: Expr -> A.M_expr
 transExpr x = case x of
-  Expr1 expr bintterm -> (transExpr expr) (transBint_term bintterm)
+  Expr1 expr bintterm -> A.M_app (A.M_or, [transExpr expr, transBint_term bintterm])
   ExprBint_term bintterm -> transBint_term bintterm
 
-transBint_term :: Bint_term -> A.M_Expr
+transBint_term :: Bint_term -> A.M_expr
 transBint_term x = case x of
-  Bint_term1 bintterm bintfactor -> (transBint_term bintterm)
+  Bint_term1 bintterm bintfactor -> A.M_app (A.M_and, [transBint_term bintterm, transBint_factor bintfactor])
   Bint_termBint_factor bintfactor -> transBint_factor bintfactor
 
 transBint_factor :: Bint_factor -> A.M_expr
 transBint_factor x = case x of
   Bint_factor1 bintfactor -> transBint_factor bintfactor
-  Bint_factor2 intexpr1 compareop intexpr2 -> (transInt_expr intexpr1) (transCompare_op compareop) (transInt_expr intexpr2)
-  Bint_factorInt_expr intexpr -> transInt_expr intxpr
+  Bint_factor2 intexpr1 compareop intexpr2 -> A.M_app (transCompare_op compareop, [transInt_expr intexpr1, transInt_expr intexpr2])
+  Bint_factorInt_expr intexpr -> transInt_expr intexpr
 
 transCompare_op :: Compare_op -> A.M_operation
 transCompare_op x = case x of
@@ -225,7 +234,7 @@ transCompare_op x = case x of
 
 transInt_expr :: Int_expr -> A.M_expr
 transInt_expr x = case x of
-  Int_expr1 intexpr addop intterm -> (transInt_expr intexpr) (transAddop addop) (transInt_term intterm)
+  Int_expr1 intexpr addop intterm -> A.M_app(transAddop addop, [transInt_expr intexpr, transInt_term intterm])
   Int_exprInt_term intterm -> transInt_term intterm
 
 transAddop :: Addop -> A.M_operation
@@ -235,7 +244,7 @@ transAddop x = case x of
 
 transInt_term :: Int_term -> A.M_expr
 transInt_term x = case x of
-  Int_term1 intterm mulop intfactor -> (transInt_term intterm) (transMulop mulop) (transInt_factor intfactor)
+  Int_term1 intterm mulop intfactor -> A.M_app (transMulop mulop, [transInt_term intterm, transInt_factor intfactor])
   Int_termInt_factor intfactor -> transInt_factor intfactor
 
 transMulop :: Mulop -> A.M_operation
@@ -246,22 +255,22 @@ transMulop x = case x of
 transInt_factor :: Int_factor -> A.M_expr
 transInt_factor x = case x of
   Int_factor1 expr -> transExpr expr
-  Int_factor2 id basicarraydimensions -> A.M_size (transID id) (transBasic_array_dimensions basicarrayDimensions)
+  Int_factor2 id basicarraydimensions -> A.M_size (transID id, transBasic_array_dimensions basicarraydimensions)
   Int_factor3 expr -> transExpr expr
   Int_factor4 expr -> transExpr expr
   Int_factor5 expr -> transExpr expr
-  Int_factor6 id modifierlist -> A.M_id (transID id) (transModifier_list modifierlist)
-  Int_factor7 cid consargumentlist -> A.M_id (transCID cid) (transCons_argument_list consargumentlist)
-  Int_factorIVAL ival -> A.M_ival ival
-  Int_factorRVAL rval -> A.M_rval rval
-  Int_factorBVAL bval -> A.M_bval bval
-  Int_factorCVAL cval -> A.M_cval cval
+  Int_factor6 id modifierlist -> A.M_id (transID id, transModifier_list modifierlist)
+  Int_factor7 cid consargumentlist -> A.M_id (transCID cid, transCons_argument_list consargumentlist)
+  Int_factorIVAL ival -> A.M_ival (transIVAL ival)
+  Int_factorRVAL rval -> A.M_rval (transRVAL rval)
+  Int_factorBVAL bval -> A.M_bval (transBVAL bval)
+  Int_factorCVAL cval -> A.M_cval (transCVAL cval)
   Int_factor8 intfactor -> transInt_factor intfactor
 
 transModifier_list :: Modifier_list -> [A.M_expr]
 transModifier_list x = case x of
   Modifier_listFun_argument_list funargumentlist -> transFun_argument_list funargumentlist
-  Modifier_listArray_dimensions arraydimensions -> transArray_dimensions arrayDimensions
+  Modifier_listArray_dimensions arraydimensions -> transArray_dimensions arraydimensions
 
 transFun_argument_list :: Fun_argument_list -> [A.M_expr]
 transFun_argument_list x = case x of

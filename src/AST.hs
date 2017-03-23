@@ -21,13 +21,13 @@ data M_type = M_int
             | M_bool 
             | M_real 
             | M_char 
-            | String
+            | M_tid String
            deriving (Eq,Show)
             
 data M_expr = M_ival Int
             | M_rval Float
             | M_bval Bool
-            | M_cval Char
+            | M_cval String
             | M_size (String,Int)
             | M_id (String,[M_expr])
             | M_app (M_operation,[M_expr])
