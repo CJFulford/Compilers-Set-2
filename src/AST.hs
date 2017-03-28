@@ -1,11 +1,19 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module AST where
 
+import Text.PrettyPrint.GenericPretty
+
+
 data M_prog = M_prog ([M_decl],[M_stmt])
+            deriving (Generic, Out)
+
+--instance (Out a) => Out (M_prog a)
 
 data M_decl = M_var (String,[M_expr],M_type)
             | M_fun (String,[(String,Int,M_type)],M_type,[M_decl],[M_stmt])
             | M_data (String,[(String,[M_type])])
-           deriving (Eq,Show)
+           deriving (Eq,Show,Generic,Out)
 
 data M_stmt = M_ass (String,[M_expr],M_expr)
             | M_while (M_expr,M_stmt)
@@ -15,14 +23,14 @@ data M_stmt = M_ass (String,[M_expr],M_expr)
             | M_return M_expr
             | M_block ([M_decl],[M_stmt])
             | M_case (M_expr,[(String,[String],M_stmt)])
-           deriving (Eq,Show)
+           deriving (Eq,Show,Generic,Out)
             
 data M_type = M_int 
             | M_bool 
             | M_real 
             | M_char 
             | M_tid String
-           deriving (Eq,Show)
+           deriving (Eq,Show,Generic,Out)
             
 data M_expr = M_ival Int
             | M_rval Float
@@ -31,14 +39,14 @@ data M_expr = M_ival Int
             | M_size (String,Int)
             | M_id (String,[M_expr])
             | M_app (M_operation,[M_expr])
-           deriving (Eq,Show)
+           deriving (Eq,Show,Generic,Out)
             
 data M_operation = M_fn String
             | M_cid String
             | M_add | M_mul | M_sub | M_div | M_neg
             | M_lt  | M_le  | M_gt  | M_ge  | M_eq  | M_not | M_and | M_or
             | M_float | M_floor | M_ceil
-           deriving (Eq,Show)
+           deriving (Eq,Show,Generic,Out)
 
 
 

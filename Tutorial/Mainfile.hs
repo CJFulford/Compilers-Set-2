@@ -20,6 +20,6 @@ main = do
         Ok rpTree -> do 
             let 
                ast = transExpr rpTree
-            putStrLn $ "\n\n" ++ show ast  ++ "\n\n"
+            putStrLn $ "\n\n" ++ show ast ++ "\n\n"
         Bad s -> error $ "Error in parsing: " ++ s 
     

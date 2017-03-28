@@ -3,8 +3,9 @@ module Main where
 import LexM
 import ParM
 import AbsM
-import SkelM
 import AST 
+import ASTConv
+import Text.PrettyPrint.GenericPretty
 import ErrM -- to show
 
 import System.Environment
@@ -20,6 +21,6 @@ main = do
         Ok rpTree -> do 
             let 
                ast = transProg rpTree
-            putStrLn $ "\n\n" ++ show ast  ++ "\n\n"
+            pp ast
         Bad s -> error $ "Error in parsing: " ++ s 
     
