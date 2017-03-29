@@ -21,8 +21,8 @@ data ScopeType = L_PROG
 				| L_CASE 
 				deriving (Eq,Show,Generic,Out)         
               
-insert::Int -> ST -> SYM_DESC -> (Int,ST)    
-lookup: ST -> String -> SYM_I_DESC  
+insert:: Int -> ST -> SYM_DESC -> (Int,ST)    
+lookup:: ST -> String -> SYM_I_DESC  
 empty:: ST
 new_scope:: ScopeType -> ST -> ST
 return:: ST -> M_type        

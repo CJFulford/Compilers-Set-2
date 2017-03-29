@@ -24,7 +24,8 @@ type ST = [SYM_TABLE]
 empty = []
 
 new_scope:: ST -> ST 
-newscope s = (Symbol_table(0,0,[])):s
+new_scope s = (Symbol_table(0,0,[])):s
+
 return:: ST -> M_type
 
 -- Lookup ====================
@@ -49,7 +50,7 @@ data SYM_I_DESC = I_VARIABLE (Int, Int, M_type, Int)
 -}
 
 
-lookup:ST -> String -> SYM_I_DESC
+look_up:: ST -> String -> SYM_I_DESC
 look_up s x = find 0 s where
 
     found level (Var_attr(offset, type_, dim))      = I_VARIABLE(level, offset, type_, dim)      
@@ -57,16 +58,20 @@ look_up s x = find 0 s where
     found level (Con_attr(offset, args, name))      = I_CONSTRUCTOR(offset, args, name)      
     found level (Typ_attr(lstr))                    = I_TYPE(lstr)
     
-    find_level ((str,v):rest)|x== str = Just v
-                           |otherwise =  find_level rest
+    find_level ((str,v):rest)   | x == str = Just v
+                                | otherwise =  find_level rest
                            
     find_level [] = Nothing
 
-    find n [] = error ("Could not find "++ str)
+    find n [] = error ("Could not find " ++ str)
     find n (Symbol_table(_,_,vs)::rest) = 
         (case find_level vs of 
             Just v -> found n v
             Nothing -> find (n+1) rest)
+
+
+
+
 
 -- Insertion ====================
 insert:: Int -> ST -> SYM_DESC -> (Int,ST) = 
