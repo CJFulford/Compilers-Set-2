@@ -1,0 +1,80 @@
+comment "/*" "*/" ;
+comment "%" ;
+
+token ID (letter ('_' | digit | letter)*) ;
+token IVAL (digit digit*) ;
+token BVAL (('t''r''u''e') | ('f''a''l''s''e')) ;
+
+
+rules   Prog ::= Block ;
+
+rules   Block ::= Declarations Program_body ;
+
+rules   Declarations ::= Declaration ";" Declarations | ;
+
+rules   Declaration ::= Var_declaration 
+                    | Fun_declaration ;
+
+rules   Var_declaration ::= "var" Basic_var_declaration ;
+
+rules 	Basic_var_declaration ::= Identifier ":" Type ;
+
+rules   Fun_declaration ::= "fun" Identifier Param_list ":" Type "{" Fun_block "}" ;
+
+rules   Fun_block ::= Declarations Fun_body ;
+
+rules   Param_list ::= "(" Parameters ")" ;
+
+rules   Parameters ::= parameters1 | ;
+
+rules 	Parameters1 ::= parameters1 "," basic_var_declaration
+						| basic_var_delaration ;
+
+rules 	Identifier ::= ID ;
+
+rules   Type ::= "int" | "bool" ;
+
+rules   Program_body ::= "begin" Prog_stmts "end" ;
+
+rules   Fun_body ::= "begin" Prog_stmts "return" Expr ";" "end" ;
+
+rules   Prog_stmts ::= Prog_stmt ";" Prog_stmts | ;
+
+rules   Prog_stmt ::= "if" Expr "then" Prog_stmt "else" Prog_stmt
+                    | "while" Expr "do" Prog_stmt
+                    | "read" ID
+                    | ID ":=" Expr
+                    | "print" Expr
+                    | "{" Block "}" ;
+ 
+rules   Expr ::= Expr "||" Bint_term | Bint_term ;
+
+rules   Bint_term ::= Bint_term "&&" Bint_factor | Bint_factor ;
+
+rules   Bint_factor ::= "not" Bint_factor
+                    | Int_expr Compare_op Int_expr
+                    | Int_expr ;
+
+rules   Compare_op ::= "=" | "<" | ">" | "=<" | ">=" ;
+
+rules   Int_expr ::= Int_expr Addop Int_term | Int_term ;
+
+rules   Addop ::= "+" | "-" ;
+
+rules   Int_term ::= Int_term Mulop Int_factor | Int_factor ;
+
+rules   Mulop ::= "*" | "/" ;
+
+
+rules	Int_factor ::= "(" Expr ")"
+					| ID Argument_list
+					| IVAL
+					| BVAL
+					| "-" Int_factor
+
+rules	Argument_list ::= "(" Arguments ")" | ;
+
+rules	Arguments ::= Arguments1 | ;
+
+rules	Arguments1 ::= Arguments1 "," Expr | Expr ;
+
