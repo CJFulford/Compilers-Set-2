@@ -125,8 +125,8 @@ All other symbols are terminals.
   | //Case// | -> | //CID// //Var_list// ``=>`` //Prog_stmt// 
   | //Var_list// | -> | ``(`` //Var_list1// ``)`` 
   |  |  **|**  | **eps**
-  | //Var_list1// | -> | //ID// //More_var_list1// 
-  | //More_var_list1// | -> | ``,`` //ID// //More_var_list1// 
+  | //Var_list1// | -> | //ID// //More_var_list// 
+  | //More_var_list// | -> | ``,`` //ID// //More_var_list// 
   |  |  **|**  | **eps**
   | //Expr// | -> | //Expr// ``||`` //Bint_term// 
   |  |  **|**  | //Bint_term// 

@@ -257,7 +257,12 @@ instance Print Var_list where
   prt i e = case e of
     Var_list1 varlist -> prPrec i 0 (concatD [doc (showString "("), prt 1 varlist, doc (showString ")")])
     Var_list2 -> prPrec i 0 (concatD [])
-    Var_list11 id morevarlist -> prPrec i 1 (concatD [prt 0 id, prt 1 morevarlist])
+    Var_list11 id morevarlist -> prPrec i 1 (concatD [prt 0 id, prt 0 morevarlist])
+
+instance Print More_var_list where
+  prt i e = case e of
+    More_var_list1 id morevarlist -> prPrec i 0 (concatD [doc (showString ","), prt 0 id, prt 0 morevarlist])
+    More_var_list2 -> prPrec i 0 (concatD [])
 
 instance Print Expr where
   prt i e = case e of

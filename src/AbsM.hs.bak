@@ -135,6 +135,10 @@ data Var_list
     = Var_list1 Var_list | Var_list2 | Var_list11 ID More_var_list
   deriving (Eq, Ord, Show, Read)
 
+data More_var_list
+    = More_var_list1 ID More_var_list | More_var_list2
+  deriving (Eq, Ord, Show, Read)
+
 data Expr = Expr1 Expr Bint_term | ExprBint_term Bint_term
   deriving (Eq, Ord, Show, Read)
 

@@ -41,7 +41,7 @@ import ErrM
 %name pCase Case
 %name pVar_list Var_list
 %name pVar_list1 Var_list1
-%name pMore_var_list1 More_var_list1
+%name pMore_var_list More_var_list
 %name pExpr Expr
 %name pBint_term Bint_term
 %name pBint_factor Bint_factor
@@ -216,10 +216,10 @@ Var_list :: { Var_list }
 Var_list : '(' Var_list1 ')' { AbsM.Var_list1 $2 }
          | {- empty -} { AbsM.Var_list2 }
 Var_list1 :: { Var_list }
-Var_list1 : ID More_var_list1 { AbsM.Var_list11 $1 $2 }
-More_var_list1 :: { More_var_list }
-More_var_list1 : ',' ID More_var_list1 { AbsM.More_var_list11 $2 $3 }
-               | {- empty -} { AbsM.More_var_list12 }
+Var_list1 : ID More_var_list { AbsM.Var_list11 $1 $2 }
+More_var_list :: { More_var_list }
+More_var_list : ',' ID More_var_list { AbsM.More_var_list1 $2 $3 }
+              | {- empty -} { AbsM.More_var_list2 }
 Expr :: { Expr }
 Expr : Expr '||' Bint_term { AbsM.Expr1 $1 $3 }
      | Bint_term { AbsM.ExprBint_term $1 }

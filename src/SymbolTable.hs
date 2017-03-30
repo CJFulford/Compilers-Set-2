@@ -1,13 +1,24 @@
 module SymbolTable (ST,empty,new_scope,insert,lookup,return)
-where 
-   import SymbolTypes  
-   empty:: ST 
-   new_scope:: ScopeType -> ST -> ST
-   insert:: Int -> ST -> SYM_DESC -> (Int,ST)
-   lookup:: ST -> string -> SYM_I_DESC
-   return:: ST -> M_type
-   
 
+data SYM_DESC = ARGUMENT (String,M_type,Int)
+              | VARIABLE (String,M_type,Int)
+              | FUNCTION (String,[(M_type,Int)],M_type)
+              | DATATYPE String 
+              | CONSTRUCTOR (String, [M_type], String)
+				deriving (Eq,Show,Generic,Out)
+              
+data SYM_I_DESC = I_VARIABLE (Int,Int,M_type,Int)
+				| I_FUNCTION (Int,String,[(M_type,Int)],M_type)
+				| I_CONSTRUCTOR (Int,[M_type],String)
+				| I_TYPE [String]
+				deriving (Eq,Show,Generic,Out)
+
+data ScopeType = L_PROG 
+				| L_FUN M_Type 
+				| L_BLK 
+				| L_CASE 
+				deriving (Eq,Show,Generic,Out)  
+				
 -- data and types ====================      
 data SYM_VALUE = Var_attr (Int,M_type,Int)
               | Fun_attr (String,[(M_type,Int)],M_type)
@@ -21,6 +32,7 @@ data SYM_TABLE = Symbol_table (Int,Int,[(String,SYM_VALUE)])
 type ST = [SYM_TABLE]
 
 -- Basic ====================
+empty::ST
 empty = []
 
 new_scope:: ST -> ST 
@@ -64,7 +76,7 @@ look_up s x = find 0 s where
 getLabel:: Int -> String -> String
 getLabel n str = "func_" + show n
 
-insert:: Int -> ST -> SYM_DESC -> (Int,ST) = 
+insert:: Int -> ST -> SYM_DESC -> (Int,ST)
 insert n [] d =  error "Symbol table error: insertion before defining scope."
 
 -- ARGUMENT (String,M_type,Int)

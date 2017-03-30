@@ -5,18 +5,18 @@ import ParM
 import AbsM
 import AST 
 import ASTConv
-import SymbolTable
+--import SymbolTable
 import Text.PrettyPrint.GenericPretty
 import ErrM -- to show
 
 import System.Environment
 
-
+{-
 typeCheck::M_prog -> M_prog
 typeCheck M_prog (declList, stmtList) = p where
 	table::ST = []
 	map insert declList
-
+-}
 main = do
     args <- getArgs
     let fname = args !! 0
@@ -26,10 +26,7 @@ main = do
         pTree  = pProg tokens
     case pTree of 
         Ok rpTree -> do 
-            let 
-               ast = transProg rpTree
-               ir = typeCheck ast
-               pp ir
+            pp (transProg rpTree)
                
         Bad s -> error $ "Error in parsing: " ++ s 
     

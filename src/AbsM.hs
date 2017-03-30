@@ -7,12 +7,9 @@ module AbsM where
 
 
 
-newtype CID = CID String deriving (Eq, Ord, Show, Read)
 newtype ID = ID String deriving (Eq, Ord, Show, Read)
-newtype RVAL = RVAL String deriving (Eq, Ord, Show, Read)
 newtype IVAL = IVAL String deriving (Eq, Ord, Show, Read)
 newtype BVAL = BVAL String deriving (Eq, Ord, Show, Read)
-newtype CVAL = CVAL String deriving (Eq, Ord, Show, Read)
 data Prog = ProgBlock Block
   deriving (Eq, Ord, Show, Read)
 
@@ -26,32 +23,16 @@ data Declarations
 data Declaration
     = DeclarationVar_declaration Var_declaration
     | DeclarationFun_declaration Fun_declaration
-    | DeclarationData_declaration Data_declaration
   deriving (Eq, Ord, Show, Read)
 
-data Var_declaration = Var_declaration1 Var_specs Type
+data Var_declaration = Var_declaration1 Basic_var_declaration
   deriving (Eq, Ord, Show, Read)
 
-data Var_specs = Var_specs1 Var_spec More_var_specs
-  deriving (Eq, Ord, Show, Read)
-
-data More_var_specs
-    = More_var_specs1 Var_spec More_var_specs | More_var_specs2
-  deriving (Eq, Ord, Show, Read)
-
-data Var_spec = Var_spec1 ID Array_dimensions
-  deriving (Eq, Ord, Show, Read)
-
-data Array_dimensions
-    = Array_dimensions1 Expr Array_dimensions | Array_dimensions2
-  deriving (Eq, Ord, Show, Read)
-
-data Type
-    = Type_int | Type_real | Type_bool | Type_char | TypeID ID
+data Basic_var_declaration = Basic_var_declaration1 Identifier Type
   deriving (Eq, Ord, Show, Read)
 
 data Fun_declaration
-    = Fun_declaration1 ID Param_list Type Fun_block
+    = Fun_declaration1 Identifier Param_list Type Fun_block
   deriving (Eq, Ord, Show, Read)
 
 data Fun_block = Fun_block1 Declarations Fun_body
@@ -61,49 +42,22 @@ data Param_list = Param_list1 Parameters
   deriving (Eq, Ord, Show, Read)
 
 data Parameters
-    = Parameters1 Basic_declaration More_parameters | Parameters2
+    = ParametersParameters1 Parameters
+    | Parameters1
+    | Parameters11 Parameters Basic_var_declaration
+    | Parameters1Basic_var_declaration Basic_var_declaration
   deriving (Eq, Ord, Show, Read)
 
-data More_parameters
-    = More_parameters1 Basic_declaration More_parameters
-    | More_parameters2
+data Identifier = IdentifierID ID
   deriving (Eq, Ord, Show, Read)
 
-data Basic_declaration
-    = Basic_declaration1 ID Basic_array_dimensions Type
+data Type = Type_int | Type_bool
   deriving (Eq, Ord, Show, Read)
 
-data Basic_array_dimensions
-    = Basic_array_dimensions1 Basic_array_dimensions
-    | Basic_array_dimensions2
+data Program_body = Program_body1 Prog_stmts
   deriving (Eq, Ord, Show, Read)
 
-data Data_declaration = Data_declaration1 ID Cons_declarations
-  deriving (Eq, Ord, Show, Read)
-
-data Cons_declarations
-    = Cons_declarations1 Cons_decl More_cons_decl
-  deriving (Eq, Ord, Show, Read)
-
-data More_cons_decl
-    = More_cons_decl1 Cons_decl More_cons_decl | More_cons_decl2
-  deriving (Eq, Ord, Show, Read)
-
-data Cons_decl = Cons_decl1 CID Type_list | Cons_declCID CID
-  deriving (Eq, Ord, Show, Read)
-
-data Type_list = Type_list1 Type More_type
-  deriving (Eq, Ord, Show, Read)
-
-data More_type = More_type1 Type More_type | More_type2
-  deriving (Eq, Ord, Show, Read)
-
-data Program_body
-    = Program_body1 Prog_stmts | Program_bodyProg_stmts Prog_stmts
-  deriving (Eq, Ord, Show, Read)
-
-data Fun_body
-    = Fun_body1 Prog_stmts Expr | Fun_body2 Prog_stmts Expr
+data Fun_body = Fun_body1 Prog_stmts Expr
   deriving (Eq, Ord, Show, Read)
 
 data Prog_stmts = Prog_stmts1 Prog_stmt Prog_stmts | Prog_stmts2
@@ -112,31 +66,10 @@ data Prog_stmts = Prog_stmts1 Prog_stmt Prog_stmts | Prog_stmts2
 data Prog_stmt
     = Prog_stmt1 Expr Prog_stmt Prog_stmt
     | Prog_stmt2 Expr Prog_stmt
-    | Prog_stmt3 Location
-    | Prog_stmt4 Location Expr
+    | Prog_stmt3 ID
+    | Prog_stmt4 ID Expr
     | Prog_stmt5 Expr
     | Prog_stmt6 Block
-    | Prog_stmt7 Expr Case_list
-  deriving (Eq, Ord, Show, Read)
-
-data Location = Location1 ID Array_dimensions
-  deriving (Eq, Ord, Show, Read)
-
-data Case_list = Case_list1 Case More_case
-  deriving (Eq, Ord, Show, Read)
-
-data More_case = More_case1 Case More_case | More_case2
-  deriving (Eq, Ord, Show, Read)
-
-data Case = Case1 CID Var_list Prog_stmt
-  deriving (Eq, Ord, Show, Read)
-
-data Var_list
-    = Var_list1 Var_list | Var_list2 | Var_list11 ID More_var_list
-  deriving (Eq, Ord, Show, Read)
-
-data More_var_list
-    = More_var_list1 ID More_var_list | More_var_list2
   deriving (Eq, Ord, Show, Read)
 
 data Expr = Expr1 Expr Bint_term | ExprBint_term Bint_term
@@ -178,36 +111,19 @@ data Mulop = Mulop1 | Mulop2
 
 data Int_factor
     = Int_factor1 Expr
-    | Int_factor2 ID Basic_array_dimensions
-    | Int_factor3 Expr
-    | Int_factor4 Expr
-    | Int_factor5 Expr
-    | Int_factor6 ID Modifier_list
-    | Int_factor7 CID Cons_argument_list
+    | Int_factor2 ID Argument_list
     | Int_factorIVAL IVAL
-    | Int_factorRVAL RVAL
     | Int_factorBVAL BVAL
-    | Int_factorCVAL CVAL
-    | Int_factor8 Int_factor
+    | Int_factor3 Int_factor
   deriving (Eq, Ord, Show, Read)
 
-data Modifier_list
-    = Modifier_listFun_argument_list Fun_argument_list
-    | Modifier_listArray_dimensions Array_dimensions
+data Argument_list = Argument_list1 Arguments | Argument_list2
   deriving (Eq, Ord, Show, Read)
 
-data Fun_argument_list = Fun_argument_list1 Arguments
-  deriving (Eq, Ord, Show, Read)
-
-data Cons_argument_list
-    = Cons_argument_listFun_argument_list Fun_argument_list
-    | Cons_argument_list1
-  deriving (Eq, Ord, Show, Read)
-
-data Arguments = Arguments1 Expr More_arguments | Arguments2
-  deriving (Eq, Ord, Show, Read)
-
-data More_arguments
-    = More_arguments1 Expr More_arguments | More_arguments2
+data Arguments
+    = ArgumentsArguments1 Arguments
+    | Arguments1
+    | Arguments11 Arguments Expr
+    | Arguments1Expr Expr
   deriving (Eq, Ord, Show, Read)
 

@@ -13,35 +13,18 @@ import ErrM
 %name pDeclarations Declarations
 %name pDeclaration Declaration
 %name pVar_declaration Var_declaration
-%name pVar_specs Var_specs
-%name pMore_var_specs More_var_specs
-%name pVar_spec Var_spec
-%name pArray_dimensions Array_dimensions
-%name pType Type
+%name pBasic_var_declaration Basic_var_declaration
 %name pFun_declaration Fun_declaration
 %name pFun_block Fun_block
 %name pParam_list Param_list
 %name pParameters Parameters
-%name pMore_parameters More_parameters
-%name pBasic_declaration Basic_declaration
-%name pBasic_array_dimensions Basic_array_dimensions
-%name pData_declaration Data_declaration
-%name pCons_declarations Cons_declarations
-%name pMore_cons_decl More_cons_decl
-%name pCons_decl Cons_decl
-%name pType_list Type_list
-%name pMore_type More_type
+%name pParameters1 Parameters1
+%name pIdentifier Identifier
+%name pType Type
 %name pProgram_body Program_body
 %name pFun_body Fun_body
 %name pProg_stmts Prog_stmts
 %name pProg_stmt Prog_stmt
-%name pLocation Location
-%name pCase_list Case_list
-%name pMore_case More_case
-%name pCase Case
-%name pVar_list Var_list
-%name pVar_list1 Var_list1
-%name pMore_var_list More_var_list
 %name pExpr Expr
 %name pBint_term Bint_term
 %name pBint_factor Bint_factor
@@ -51,11 +34,9 @@ import ErrM
 %name pInt_term Int_term
 %name pMulop Mulop
 %name pInt_factor Int_factor
-%name pModifier_list Modifier_list
-%name pFun_argument_list Fun_argument_list
-%name pCons_argument_list Cons_argument_list
+%name pArgument_list Argument_list
 %name pArguments Arguments
-%name pMore_arguments More_arguments
+%name pArguments1 Arguments1
 -- no lexer declaration
 %monad { Err } { thenM } { returnM }
 %tokentype {Token}
@@ -74,56 +55,37 @@ import ErrM
   '<' { PT _ (TS _ 12) }
   '=' { PT _ (TS _ 13) }
   '=<' { PT _ (TS _ 14) }
-  '=>' { PT _ (TS _ 15) }
-  '>' { PT _ (TS _ 16) }
-  '>=' { PT _ (TS _ 17) }
-  '[' { PT _ (TS _ 18) }
-  ']' { PT _ (TS _ 19) }
-  'begin' { PT _ (TS _ 20) }
-  'bool' { PT _ (TS _ 21) }
-  'case' { PT _ (TS _ 22) }
-  'ceil' { PT _ (TS _ 23) }
-  'char' { PT _ (TS _ 24) }
-  'data' { PT _ (TS _ 25) }
-  'do' { PT _ (TS _ 26) }
-  'else' { PT _ (TS _ 27) }
-  'end' { PT _ (TS _ 28) }
-  'float' { PT _ (TS _ 29) }
-  'floor' { PT _ (TS _ 30) }
-  'fun' { PT _ (TS _ 31) }
-  'if' { PT _ (TS _ 32) }
-  'int' { PT _ (TS _ 33) }
-  'not' { PT _ (TS _ 34) }
-  'of' { PT _ (TS _ 35) }
-  'print' { PT _ (TS _ 36) }
-  'read' { PT _ (TS _ 37) }
-  'real' { PT _ (TS _ 38) }
-  'return' { PT _ (TS _ 39) }
-  'size' { PT _ (TS _ 40) }
-  'then' { PT _ (TS _ 41) }
-  'var' { PT _ (TS _ 42) }
-  'while' { PT _ (TS _ 43) }
-  '{' { PT _ (TS _ 44) }
-  '|' { PT _ (TS _ 45) }
-  '||' { PT _ (TS _ 46) }
-  '}' { PT _ (TS _ 47) }
+  '>' { PT _ (TS _ 15) }
+  '>=' { PT _ (TS _ 16) }
+  'begin' { PT _ (TS _ 17) }
+  'bool' { PT _ (TS _ 18) }
+  'do' { PT _ (TS _ 19) }
+  'else' { PT _ (TS _ 20) }
+  'end' { PT _ (TS _ 21) }
+  'fun' { PT _ (TS _ 22) }
+  'if' { PT _ (TS _ 23) }
+  'int' { PT _ (TS _ 24) }
+  'not' { PT _ (TS _ 25) }
+  'print' { PT _ (TS _ 26) }
+  'read' { PT _ (TS _ 27) }
+  'return' { PT _ (TS _ 28) }
+  'then' { PT _ (TS _ 29) }
+  'var' { PT _ (TS _ 30) }
+  'while' { PT _ (TS _ 31) }
+  '{' { PT _ (TS _ 32) }
+  '||' { PT _ (TS _ 33) }
+  '}' { PT _ (TS _ 34) }
 
-L_CID { PT _ (T_CID $$) }
 L_ID { PT _ (T_ID $$) }
-L_RVAL { PT _ (T_RVAL $$) }
 L_IVAL { PT _ (T_IVAL $$) }
 L_BVAL { PT _ (T_BVAL $$) }
-L_CVAL { PT _ (T_CVAL $$) }
 
 
 %%
 
-CID    :: { CID} : L_CID { CID ($1)}
 ID    :: { ID} : L_ID { ID ($1)}
-RVAL    :: { RVAL} : L_RVAL { RVAL ($1)}
 IVAL    :: { IVAL} : L_IVAL { IVAL ($1)}
 BVAL    :: { BVAL} : L_BVAL { BVAL ($1)}
-CVAL    :: { CVAL} : L_CVAL { CVAL ($1)}
 
 Prog :: { Prog }
 Prog : Block { AbsM.ProgBlock $1 }
@@ -135,91 +97,40 @@ Declarations : Declaration ';' Declarations { AbsM.Declarations1 $1 $3 }
 Declaration :: { Declaration }
 Declaration : Var_declaration { AbsM.DeclarationVar_declaration $1 }
             | Fun_declaration { AbsM.DeclarationFun_declaration $1 }
-            | Data_declaration { AbsM.DeclarationData_declaration $1 }
 Var_declaration :: { Var_declaration }
-Var_declaration : 'var' Var_specs ':' Type { AbsM.Var_declaration1 $2 $4 }
-Var_specs :: { Var_specs }
-Var_specs : Var_spec More_var_specs { AbsM.Var_specs1 $1 $2 }
-More_var_specs :: { More_var_specs }
-More_var_specs : ',' Var_spec More_var_specs { AbsM.More_var_specs1 $2 $3 }
-               | {- empty -} { AbsM.More_var_specs2 }
-Var_spec :: { Var_spec }
-Var_spec : ID Array_dimensions { AbsM.Var_spec1 $1 $2 }
-Array_dimensions :: { Array_dimensions }
-Array_dimensions : '[' Expr ']' Array_dimensions { AbsM.Array_dimensions1 $2 $4 }
-                 | {- empty -} { AbsM.Array_dimensions2 }
-Type :: { Type }
-Type : 'int' { AbsM.Type_int }
-     | 'real' { AbsM.Type_real }
-     | 'bool' { AbsM.Type_bool }
-     | 'char' { AbsM.Type_char }
-     | ID { AbsM.TypeID $1 }
+Var_declaration : 'var' Basic_var_declaration { AbsM.Var_declaration1 $2 }
+Basic_var_declaration :: { Basic_var_declaration }
+Basic_var_declaration : Identifier ':' Type { AbsM.Basic_var_declaration1 $1 $3 }
 Fun_declaration :: { Fun_declaration }
-Fun_declaration : 'fun' ID Param_list ':' Type '{' Fun_block '}' { AbsM.Fun_declaration1 $2 $3 $5 $7 }
+Fun_declaration : 'fun' Identifier Param_list ':' Type '{' Fun_block '}' { AbsM.Fun_declaration1 $2 $3 $5 $7 }
 Fun_block :: { Fun_block }
 Fun_block : Declarations Fun_body { AbsM.Fun_block1 $1 $2 }
 Param_list :: { Param_list }
 Param_list : '(' Parameters ')' { AbsM.Param_list1 $2 }
 Parameters :: { Parameters }
-Parameters : Basic_declaration More_parameters { AbsM.Parameters1 $1 $2 }
-           | {- empty -} { AbsM.Parameters2 }
-More_parameters :: { More_parameters }
-More_parameters : ',' Basic_declaration More_parameters { AbsM.More_parameters1 $2 $3 }
-                | {- empty -} { AbsM.More_parameters2 }
-Basic_declaration :: { Basic_declaration }
-Basic_declaration : ID Basic_array_dimensions ':' Type { AbsM.Basic_declaration1 $1 $2 $4 }
-Basic_array_dimensions :: { Basic_array_dimensions }
-Basic_array_dimensions : '[' ']' Basic_array_dimensions { AbsM.Basic_array_dimensions1 $3 }
-                       | {- empty -} { AbsM.Basic_array_dimensions2 }
-Data_declaration :: { Data_declaration }
-Data_declaration : 'data' ID ':=' Cons_declarations { AbsM.Data_declaration1 $2 $4 }
-Cons_declarations :: { Cons_declarations }
-Cons_declarations : Cons_decl More_cons_decl { AbsM.Cons_declarations1 $1 $2 }
-More_cons_decl :: { More_cons_decl }
-More_cons_decl : '|' Cons_decl More_cons_decl { AbsM.More_cons_decl1 $2 $3 }
-               | {- empty -} { AbsM.More_cons_decl2 }
-Cons_decl :: { Cons_decl }
-Cons_decl : CID 'of' Type_list { AbsM.Cons_decl1 $1 $3 }
-          | CID { AbsM.Cons_declCID $1 }
-Type_list :: { Type_list }
-Type_list : Type More_type { AbsM.Type_list1 $1 $2 }
-More_type :: { More_type }
-More_type : '*' Type More_type { AbsM.More_type1 $2 $3 }
-          | {- empty -} { AbsM.More_type2 }
+Parameters : Parameters1 { AbsM.ParametersParameters1 $1 }
+           | {- empty -} { AbsM.Parameters1 }
+Parameters1 :: { Parameters }
+Parameters1 : Parameters1 ',' Basic_var_declaration { AbsM.Parameters11 $1 $3 }
+            | Basic_var_declaration { AbsM.Parameters1Basic_var_declaration $1 }
+Identifier :: { Identifier }
+Identifier : ID { AbsM.IdentifierID $1 }
+Type :: { Type }
+Type : 'int' { AbsM.Type_int } | 'bool' { AbsM.Type_bool }
 Program_body :: { Program_body }
 Program_body : 'begin' Prog_stmts 'end' { AbsM.Program_body1 $2 }
-             | Prog_stmts { AbsM.Program_bodyProg_stmts $1 }
 Fun_body :: { Fun_body }
 Fun_body : 'begin' Prog_stmts 'return' Expr ';' 'end' { AbsM.Fun_body1 $2 $4 }
-         | Prog_stmts 'return' Expr ';' { AbsM.Fun_body2 $1 $3 }
 Prog_stmts :: { Prog_stmts }
 Prog_stmts : Prog_stmt ';' Prog_stmts { AbsM.Prog_stmts1 $1 $3 }
            | {- empty -} { AbsM.Prog_stmts2 }
 Prog_stmt :: { Prog_stmt }
 Prog_stmt : 'if' Expr 'then' Prog_stmt 'else' Prog_stmt { AbsM.Prog_stmt1 $2 $4 $6 }
           | 'while' Expr 'do' Prog_stmt { AbsM.Prog_stmt2 $2 $4 }
-          | 'read' Location { AbsM.Prog_stmt3 $2 }
-          | Location ':=' Expr { AbsM.Prog_stmt4 $1 $3 }
+          | 'read' ID { AbsM.Prog_stmt3 $2 }
+          | ID ':=' Expr { AbsM.Prog_stmt4 $1 $3 }
           | 'print' Expr { AbsM.Prog_stmt5 $2 }
           | '{' Block '}' { AbsM.Prog_stmt6 $2 }
-          | 'case' Expr 'of' '{' Case_list '}' { AbsM.Prog_stmt7 $2 $5 }
-Location :: { Location }
-Location : ID Array_dimensions { AbsM.Location1 $1 $2 }
-Case_list :: { Case_list }
-Case_list : Case More_case { AbsM.Case_list1 $1 $2 }
-More_case :: { More_case }
-More_case : '|' Case More_case { AbsM.More_case1 $2 $3 }
-          | {- empty -} { AbsM.More_case2 }
-Case :: { Case }
-Case : CID Var_list '=>' Prog_stmt { AbsM.Case1 $1 $2 $4 }
-Var_list :: { Var_list }
-Var_list : '(' Var_list1 ')' { AbsM.Var_list1 $2 }
-         | {- empty -} { AbsM.Var_list2 }
-Var_list1 :: { Var_list }
-Var_list1 : ID More_var_list { AbsM.Var_list11 $1 $2 }
-More_var_list :: { More_var_list }
-More_var_list : ',' ID More_var_list { AbsM.More_var_list1 $2 $3 }
-              | {- empty -} { AbsM.More_var_list2 }
 Expr :: { Expr }
 Expr : Expr '||' Bint_term { AbsM.Expr1 $1 $3 }
      | Bint_term { AbsM.ExprBint_term $1 }
@@ -248,31 +159,19 @@ Mulop :: { Mulop }
 Mulop : '*' { AbsM.Mulop1 } | '/' { AbsM.Mulop2 }
 Int_factor :: { Int_factor }
 Int_factor : '(' Expr ')' { AbsM.Int_factor1 $2 }
-           | 'size' '(' ID Basic_array_dimensions ')' { AbsM.Int_factor2 $3 $4 }
-           | 'float' '(' Expr ')' { AbsM.Int_factor3 $3 }
-           | 'floor' '(' Expr ')' { AbsM.Int_factor4 $3 }
-           | 'ceil' '(' Expr ')' { AbsM.Int_factor5 $3 }
-           | ID Modifier_list { AbsM.Int_factor6 $1 $2 }
-           | CID Cons_argument_list { AbsM.Int_factor7 $1 $2 }
+           | ID Argument_list { AbsM.Int_factor2 $1 $2 }
            | IVAL { AbsM.Int_factorIVAL $1 }
-           | RVAL { AbsM.Int_factorRVAL $1 }
            | BVAL { AbsM.Int_factorBVAL $1 }
-           | CVAL { AbsM.Int_factorCVAL $1 }
-           | '-' Int_factor { AbsM.Int_factor8 $2 }
-Modifier_list :: { Modifier_list }
-Modifier_list : Fun_argument_list { AbsM.Modifier_listFun_argument_list $1 }
-              | Array_dimensions { AbsM.Modifier_listArray_dimensions $1 }
-Fun_argument_list :: { Fun_argument_list }
-Fun_argument_list : '(' Arguments ')' { AbsM.Fun_argument_list1 $2 }
-Cons_argument_list :: { Cons_argument_list }
-Cons_argument_list : Fun_argument_list { AbsM.Cons_argument_listFun_argument_list $1 }
-                   | {- empty -} { AbsM.Cons_argument_list1 }
+           | '-' Int_factor { AbsM.Int_factor3 $2 }
+Argument_list :: { Argument_list }
+Argument_list : '(' Arguments ')' { AbsM.Argument_list1 $2 }
+              | {- empty -} { AbsM.Argument_list2 }
 Arguments :: { Arguments }
-Arguments : Expr More_arguments { AbsM.Arguments1 $1 $2 }
-          | {- empty -} { AbsM.Arguments2 }
-More_arguments :: { More_arguments }
-More_arguments : ',' Expr More_arguments { AbsM.More_arguments1 $2 $3 }
-               | {- empty -} { AbsM.More_arguments2 }
+Arguments : Arguments1 { AbsM.ArgumentsArguments1 $1 }
+          | {- empty -} { AbsM.Arguments1 }
+Arguments1 :: { Arguments }
+Arguments1 : Arguments1 ',' Expr { AbsM.Arguments11 $1 $3 }
+           | Expr { AbsM.Arguments1Expr $1 }
 {
 
 returnM :: a -> Err a
