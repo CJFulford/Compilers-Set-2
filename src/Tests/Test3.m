@@ -4,6 +4,9 @@
  this is a test for block comments
 */
 
+
 var x:int;
 var y:int;
-print x[0];
+begin
+print x;
+end

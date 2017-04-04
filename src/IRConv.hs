@@ -1,10 +1,10 @@
-module ASTConv where
+module IRConv where
 
-import AbsM
 import AST
+import IR
 
 -- tokens
-transID :: ID -> String
+transID :: A_ID -> String
 transID x = case x of
     ID string -> string
 
@@ -20,7 +20,7 @@ transBVAL x = case x of
 
 
 -- Program
-transProg :: Prog -> M_prog
+transProg :: M_prog -> I_PROG
 transProg x = case x of
     ProgBlock block -> M_prog (transBlock block)
 
@@ -109,7 +109,7 @@ transBint_term x = case x of
 
 transBint_factor :: Bint_factor -> M_expr
 transBint_factor x = case x of
-    Bint_factor1 bintfactor -> M_app (M_not, [transBint_factor bintfactor])
+    Bint_factor1 bintfactor -> transBint_factor bintfactor
     Bint_factor2 intexpr1 compareop intexpr2 -> M_app (transCompare_op compareop, [transInt_expr intexpr1, transInt_expr intexpr2])
     Bint_factorInt_expr intexpr -> transInt_expr intexpr
 

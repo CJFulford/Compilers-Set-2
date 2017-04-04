@@ -1,19 +1,18 @@
 % testing conditionals
-
-data foot := #toe of foot | #ankle of foot;
-fun func (x:foot):int
+fun func (x:int):int
 { 
 	var w:bool;
 	var x:bool;
 	var y:int;
 	var z:int;
 	
+    begin
 	w := false;
 	x := true;
 	y := 5;
 	z := 4;
 	
-	if ((y =< z) && w)
+	if (y =< z)
 	then
 	{
 		w := false;
@@ -34,4 +33,12 @@ fun func (x:foot):int
 	};
 	
 	return y + z;
+    end
 };
+
+var x:int
+begin
+read x;
+print func(x);
+end
+

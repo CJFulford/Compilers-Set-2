@@ -1,5 +1,5 @@
-comment "/*" "*/" ;
 comment "%" ;
+comment "/*" "*/" ;
 
 token ID (letter ('_' | digit | letter)*) ;
 token IVAL (digit digit*) ;
