@@ -82,6 +82,7 @@ insertFuncs ((M_fun(str, args, retType, prog)):funcs) st = case (insert st (FUNC
 
     
 checkExprs::[M_expr] -> ST -> Either String [(M_type, I_expr)]
+checkExprs [] _ = Right []
 checkExprs (e:es) st = case (checkExpr e st) of
     Left err ->  Left err 
     Right e' -> case (checkExprs es st) of
@@ -392,19 +393,19 @@ checkFunc (M_fun(fName , args, return, M_prog(decls, stmts))) st =
                                 Right iFunc ->
                                     case (checkStmts stmts st''') of 
                                         Left err'''    -> Left err'''
-                                        Right stmtList -> Right (I_fun(fName, iFunc, length varList, stmtList))
+                                        Right stmtList -> Right (I_fun("func_" ++ fName, iFunc, length varList, stmtList))
             
             
             
 -- M_prog ([M_decl], [M_stmt])
 -- I_prog ([I_fbody],Int,[I_stmt])
-genIR::M_prog -> ST -> Either String I_prog
-genIR (M_prog (declList, stmtList)) st =
+genIR::M_prog -> Either String I_prog
+genIR (M_prog (declList, stmtList)) =
     let
         varList = filter isVarDec declList
         funList = filter isFunDec declList
     in
-    case (insertVars varList st) of 
+    case (insertVars varList (new_scope empty)) of 
         Left err -> Left err
         Right st' -> 
             case (insertFuncs funList st') of
@@ -429,11 +430,14 @@ main = do
         tokens = myLexer fConts
         pTree  = pProg tokens
     case pTree of 
-        Ok rpTree -> do
+        Ok rpTree ->
                 let
                     ast = transProg rpTree
-                    --ir = genIR ast []
-                pp ast
+                in
+                case (genIR ast) of
+                    Left err -> putStrLn err
+                    Right ir -> pp ir
+                
                
         Bad s -> error $ "Error in parsing: " ++ s 
     
