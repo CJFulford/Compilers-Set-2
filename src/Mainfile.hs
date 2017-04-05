@@ -21,10 +21,16 @@ isFunDec::M_decl -> Bool
 isFunDec (M_fun(_, _, _, _)) = True
 isFunDec _ = False
 
+isInt::M_type -> Bool
+isInt M_int = True
+isInt _ = False
+
+isBool::M_type -> Bool
+isBool M_bool = True
+isBool _ = False
 
 
-
-
+{-
 insertVars::[M_decl] -> ST -> Either String ST
 insertVars [] st = st
 insertVars (d:ds) st = case (insertDec d st) of
@@ -52,7 +58,7 @@ insertFunc M_fun(str, args, retType, prog) st = x where
 
 
 
-exprType::M_expr -> ST -> M_type
+exprType::M_expr -> ST -> Either String (M_type, I_expr)
 exprType expr st = case expr of
     M_num x -> M_num
     M_bl x  -> M_bl
@@ -73,36 +79,109 @@ exprType expr st = case expr of
         M_or  -> (exprType expr1) == M_bl  && (exprType expr2) == M_bl
         M_fn x-> type_ where (I_FUNCTION(_,_,_, type_)) = look_up x st
 
+-}
 
-stmtCheck::[M_stmt] -> ST -> Bool
-stmtCheck (s:sl) st =  case s of
-    (M_ass(str, expr)) -> (look_up str st) == (exprType expr st)
-    (M_while(expr, stmt)) -> (exprType expr == Bool) && (stmtCheck stmt)
-    (M_cond(expr, stmt1, stmt2)) -> (exprType expr == Bool) && (stmtCheck stmt1) && (stmtCheck stmt2)
-    (M_read(str)) -> look_up str st
-    (M_print(expr)) -> exprType == M_expr
-    (M_return(expr)) -> exprType == M_expr
-    (M_block(declList, stmtList) -> do
-        new_scope st
-        case (insertDecs declList (fst st)) of
-            Left str -> do 
-            putStrLn str
-            False
-        Right newST -> do
-            stmtCheck stmtList newST
-    
+checkStmts::[M_stmt] -> ST -> Either String [I_stmt]
+checkStmts [] st = Right []
+checkStmts (stmt:stmts) st = case (checkStmt stmt st) of
+    Left err    -> Left err
+    Right iStmt -> case (checkStmts stmts) of
+        Left err    -> Left error
+        Right iStmts-> Right iStmt:iStmts
+
+checkStmt::M_stmt -> ST -> Either String I_stmt
+checkStmt stmt st =  case stmt of
+    -- M_ass    (String, M_expr)
+    -- I_ass    (Int,Int,I_expr)
+    (M_ass(str, expr)) -> do
+        let
+            (I_VARIABLE(level, offset, strType)) = look_up str st
+        in
+        case (exprType expr st) of
+            Left err            -> Left err
+            Right (eType, iExpr)-> do
+                if (strType == eType)
+                then Right I_ass(level, offset, iExpr)
+                else Left ("Illegal assignment. Expected " ++ strType ++ " recieved " ++ eType)
+    -- M_while   (M_expr, M_stmt)
+    -- I_while   (I_expr,I_stmt)
+    (M_while(expr, stmt)) -> 
+        case (exprType expr st) of
+            Left err            -> Left err
+            Right (eType, iExpr)-> do
+                if (isBool eType)
+                then case (checkStmt stmt) of
+                    Left err    -> Left err
+                    Right iStmt -> I_while(iExpr, iStmt)
+                else Left ("Illegal Expression. Boolean expected")
+    -- M_cond    (M_expr, M_stmt, M_stmt)
+    -- I_cond    (I_expr,I_stmt,I_stmt)
+    (M_cond(expr, stmt1, stmt2)) -> 
+        case (exprType expr st) of
+                Left err            -> Left err
+                Right (eType, iExpr)-> do
+                    if (isBool eType)
+                    then case (checkStmt stmt1 st) of
+                        Left err     -> Left err
+                        Right iStmt1 -> case (checkStmt stmt2 st) of
+                            Left err    -> Left err
+                            Right iStmt2-> I_cond(iExpr, iStmt1, iStmt2)
+                    else Left ("Illegal Expression. Boolean expected")
+    -- M_read    String
+    -- I_read_I  (Int,Int)
+    -- I_read_B  (Int,Int)
+    (M_read(str)) -> 
+        let 
+            (I_VARIABLE(level, offset, strType)) = look_up str st
+        in
+        if (isInt strType) -- only 2 types int and bool
+        then I_read_I (level, offset)
+        else I_read_B (level, offset)
+    -- M_print   M_expr
+    -- I_print_I I_expr
+    -- I_print_B I_expr
+    (M_print(str)) -> 
+        let 
+            (I_VARIABLE(level, offset, strType)) = look_up str st
+        in
+        if (isInt strType) -- only 2 types int and bool
+        then I_print_I (level, offset)
+        else I_print_B (level, offset)
+    -- M_return  M_expr
+    -- I_return  I_expr
+    (M_return(expr)) -> 
+        case (exprType expr st) of
+            Left err             -> Left err
+            Right (eType, iExpr) -> Right I_return(iExpr)
+    -- M_block   ([M_decl], [M_stmt])
+    -- I_block   ([I_fbody],Int,[I_stmt])
+    (M_block(declList, stmtList)) ->
+        let
+            varList = filter isVarDec decList
+            funList = filter isFunDec decList
+        in
+        case (insertVars varList (new_scope st)) of 
+        Left err -> Left err
+        Right st' -> case (insertFuncs funList st') of
+            Left err -> Left err
+            Right st'' ->  Right I_block(checkFuncs funList st'', length varList, checkStmts stmtList st'')
 
 
-
-genIR::M_prog -> ST -> I_prog
+-- M_prog ([M_decl], [M_stmt])
+-- I_prog ([I_fbody],Int,[I_stmt])
+genIR::M_prog -> ST -> Either String I_prog
 genIR (M_prog (declList, stmtList)) st = p where
-    varList = filter isVarDec decList
-    funList = filter isFunDec decList
-    (errV, vST) = insertVars varList st
-    (errF, fST) = insertFuncs funList vST
-    stmtCheck stmtList
-                
-            
+    let
+        varList = filter isVarDec decList
+        funList = filter isFunDec decList
+    in
+    case (insertVars varList st) of 
+    Left err -> Left err
+    Right st' -> case (insertFuncs funList st') of
+        Left err -> Left err
+        Right st'' ->  Right I_prog(checkFuncs funList st'', length varList, checkStmts stmtList st'')
+
+      
     
     
     
