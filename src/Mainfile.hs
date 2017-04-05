@@ -29,35 +29,41 @@ isBool::M_type -> Bool
 isBool M_bool = True
 isBool _ = False
 
-
 {-
+data SYM_DESC = ARGUMENT (String,M_type)
+              | VARIABLE (String,M_type)
+              | FUNCTION (String,[M_type],M_type)
+-}
+
+-- M_var (String, M_type)
+-- helper funtion for properly formating a list of vars declarations for insertion into the ST as arguments
+insertArgs::[M_decl] -> ST -> Either String ST
+insertArgs [] st = st
+insertArgs ((M_var(str, type_)):vars) st = case (insert st (ARGUMENT(str, type_))) of
+    Left err  -> Left err
+    Right st' -> insertDecs vars st'
+
+-- M_var (String, M_type)
+-- helper funtion for properly formating a list of var declarations for insertion into the ST as variables
 insertVars::[M_decl] -> ST -> Either String ST
 insertVars [] st = st
-insertVars (d:ds) st = case (insertDec d st) of
-    Left str -> Left str
-    Right newST -> insertDecs ds newST
-    
-insertVar::M_decl -> ST ->  Either String ST
-insertVar M_var(str, type_) st = insert st (VARIABLE(str, type_))
-
-
+insertVars ((M_var(str, type_)):vars) st = case (insert st (VARIABLE(str, type_))) of
+    Left err  -> Left err
+    Right st' -> insertDecs vars st'
 
 --M_fun (String ,[(String, M_type)], M_type, M_prog)
+-- helper funtion for properly formating a list of Fun declarations for insertion into the ST as functions
 insertFuncs::[M_decl] -> ST -> Either String ST
 insertFuncs [] st = st
-insertFuncs (d:ds) st = case (insertDec d st) of
+insertFuncs ((M_fun(str, args, retType, prog)):funcs) st = case (insert st (FUNCTION(str, map snd args, retType)) of
     Left str -> Left str
-    Right newST -> insertFunc ds newST
-    
-insertFunc::M_decl -> ST ->  Either String ST
-insertFunc M_fun(str, args, retType, prog) st = x where
-    (err, newST) = insert st (FUNCTION(str, map snd args, retType))
+    Right st' -> insertFunc funcs st'
     
 
 
 
 
-
+{-
 exprType::M_expr -> ST -> Either String (M_type, I_expr)
 exprType expr st = case expr of
     M_num x -> M_num
@@ -80,6 +86,12 @@ exprType expr st = case expr of
         M_fn x-> type_ where (I_FUNCTION(_,_,_, type_)) = look_up x st
 
 -}
+
+
+
+
+
+
 
 checkStmts::[M_stmt] -> ST -> Either String [I_stmt]
 checkStmts [] st = Right []
@@ -167,6 +179,13 @@ checkStmt stmt st =  case stmt of
             Right st'' ->  Right I_block(checkFuncs funList st'', length varList, checkStmts stmtList st'')
 
 
+            
+            
+            
+            
+            
+            
+            
 -- M_prog ([M_decl], [M_stmt])
 -- I_prog ([I_fbody],Int,[I_stmt])
 genIR::M_prog -> ST -> Either String I_prog
