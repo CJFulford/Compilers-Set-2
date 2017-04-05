@@ -37,9 +37,9 @@ data SYM_DESC = ARGUMENT (String,M_type)
 
 -- M_var (String, M_type)
 -- helper funtion for properly formating a list of vars declarations for insertion into the ST as arguments
-insertArgs::[M_decl] -> ST -> Either String ST
+insertArgs::[[(String, M_type)]] -> ST -> Either String ST
 insertArgs [] st = st
-insertArgs ((M_var(str, type_)):vars) st = case (insert st (ARGUMENT(str, type_))) of
+insertArgs ((str, type_):vars) st = case (insert st (ARGUMENT(str, type_))) of
     Left err  -> Left err
     Right st' -> insertDecs vars st'
 
@@ -60,32 +60,215 @@ insertFuncs ((M_fun(str, args, retType, prog)):funcs) st = case (insert st (FUNC
     Right st' -> insertFunc funcs st'
     
 
-
-
-
 {-
-exprType::M_expr -> ST -> Either String (M_type, I_expr)
-exprType expr st = case expr of
-    M_num x -> M_num
-    M_bl x  -> M_bl
-    M_id s  -> t where (I_VARIABLE(_, _, t)) = look_up st s
-    M_operation(op, expr1, expr2) -> case op of
-        M_add -> (exprType expr1) == M_num && (exprType expr2) == M_num
-        M_mul -> (exprType expr1) == M_num && (exprType expr2) == M_num
-        M_sub -> (exprType expr1) == M_num && (exprType expr2) == M_num
-        M_div -> (exprType expr1) == M_num && (exprType expr2) == M_num
-        M_neg -> (exprType expr1) == M_num && (exprType expr2) == M_num
-        M_lt  -> (exprType expr1) == M_num && (exprType expr2) == M_num
-        M_le  -> (exprType expr1) == M_num && (exprType expr2) == M_num
-        M_gt  -> (exprType expr1) == M_num && (exprType expr2) == M_num
-        M_ge  -> (exprType expr1) == M_num && (exprType expr2) == M_num
-        M_eq  -> (exprType expr1) == M_num && (exprType expr2) == M_num
-        M_not -> (exprType expr1) == M_bl
-        M_and -> (exprType expr1) == M_bl  && (exprType expr2) == M_bl
-        M_or  -> (exprType expr1) == M_bl  && (exprType expr2) == M_bl
-        M_fn x-> type_ where (I_FUNCTION(_,_,_, type_)) = look_up x st
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+data M_type = M_int | M_bool    
+           deriving (Eq, Show, Generic, Out)
+           
+data M_expr = M_num Int
+            | M_bl Bool
+            | M_id String
+            | M_app (M_operation, [M_expr])
+           deriving (Eq, Show, Generic, Out)
+           
+data M_operation =  M_fn String 
+            | M_add | M_mul | M_sub | M_div | M_neg
+            | M_lt | M_le | M_gt | M_ge | M_eq 
+            | M_not | M_and | M_or
+           deriving (Eq, Show, Generic, Out)       
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+data I_expr = I_num      Int
+            | I_bool     Bool
+            | I_id       (Int,Int)
+            | I_app      (I_opn,[I_expr])
+            deriving (Eq, Show, Generic, Out)
+            
+data I_opn = I_call (String,Int)    
+           | I_add | I_mul | I_sub | I_div | I_neg
+           | I_lt  | I_le  | I_gt  | I_ge  | I_eq 
+           | I_not | I_and | I_or
+            deriving (Eq, Show, Generic, Out)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-}   
+    
+    
+    
+checkExprs::[M_expr] -> ST -> Either String [(M_type, I_expr)]
+checkExprs (e:es) st = case (checkExpr e st) of
+    Left err ->  Left err 
+    Right e' -> case (checkExprs es st) of
+        Left err' -> Left err'
+        Right es' -> Right (e':es')
 
--}
+
+
+checkExpr::M_expr -> ST -> Either String (M_type, I_expr)
+checkExpr expr st = case expr of
+    M_num int -> Right (M_int, I_num int)
+    M_bl bool -> Right (M_bool, I_bool bool)
+    M_id str  -> Right (eType, (level, offset)) where I_VARIABLE(level, offset, eType)
+    M_app (op, exprList) -> case op of
+        M_fn str->
+            let
+                I_FUNCTION(level, label , args, retType) = lookup str st
+            in
+            case (checkExprs exprList st) of 
+                Left err -> Left error
+                Right ei ->
+                    let
+                        types = map fst ei
+                        exprs = map snd ei
+                    in
+                    if (types == args)
+                    then Right (retType, I_app(I_call(label, level), exprs))
+                    else Left "Argument types dont match function parameters"
+        M_add -> 
+            case (checkExprs exprList st) of 
+                Left err -> Left error
+                Right ei ->
+                    let
+                        types = map fst ei
+                        exprs = map snd ei
+                    in
+                    if (foldr (&&) (map (isNum) types))
+                    then Right (M_int, I_app(I_add, exprs))
+                    else Left ("Invalid Expression. Only Integers are valid")
+        M_sub -> 
+            case (checkExprs exprList st) of 
+                Left err -> Left error
+                Right ei ->
+                    let
+                        types = map fst ei
+                        exprs = map snd ei
+                    in
+                    if (foldr (&&) (map (isNum) types))
+                    then Right (M_int, I_app(I_sub, exprs))
+                    else Left ("Invalid Expression. Only Integers are valid")
+        M_mul -> 
+            case (checkExprs exprList st) of 
+                Left err -> Left error
+                Right ei ->
+                    let
+                        types = map fst ei
+                        exprs = map snd ei
+                    in
+                    if (foldr (&&) (map (isNum) types))
+                    then Right (M_int, I_app(I_mul, exprs))
+                    else Left ("Invalid Expression. Only Integers are valid")
+        M_div -> 
+            case (checkExprs exprList st) of 
+                Left err -> Left error
+                Right ei ->
+                    let
+                        types = map fst ei
+                        exprs = map snd ei
+                    in
+                    if (foldr (&&) (map (isNum) types))
+                    then Right (M_int, I_app(I_div, exprs))
+                    else Left ("Invalid Expression. Only Integers are valid")
+        M_neg -> 
+            case (checkExprs exprList st) of 
+                Left err -> Left error
+                Right ei ->
+                    let
+                        types = map fst ei
+                        exprs = map snd ei
+                    in
+                    if (foldr (&&) (map (isNum) types))
+                    then Right (M_int, I_app(I_neg, exprs))
+                    else Left ("Invalid Expression. Only Integers are valid")
+        M_lt -> 
+            case (checkExprs exprList st) of 
+                Left err -> Left error
+                Right ei ->
+                    let
+                        types = map fst ei
+                        exprs = map snd ei
+                    in
+                    if (foldr (&&) (map (isNum) types))
+                    then Right (M_bool, I_app(I_lt, exprs))
+                    else Left ("Invalid Expression. Only Integers are valid")
+        M_le -> 
+            case (checkExprs exprList st) of 
+                Left err -> Left error
+                Right ei ->
+                    let
+                        types = map fst ei
+                        exprs = map snd ei
+                    in
+                    if (foldr (&&) (map (isNum) types))
+                    then Right (M_bool, I_app(I_le, exprs))
+                    else Left ("Invalid Expression. Only Integers are valid")
+        M_gt -> 
+            case (checkExprs exprList st) of 
+                Left err -> Left error
+                Right ei ->
+                    let
+                        types = map fst ei
+                        exprs = map snd ei
+                    in
+                    if (foldr (&&) (map (isNum) types))
+                    then Right (M_bool, I_app(I_gt, exprs))
+                    else Left ("Invalid Expression. Only Integers are valid")
+        M_ge -> 
+            case (checkExprs exprList st) of 
+                Left err -> Left error
+                Right ei ->
+                    let
+                        types = map fst ei
+                        exprs = map snd ei
+                    in
+                    if (foldr (&&) (map (isNum) types))
+                    then Right (M_bool, I_app(I_ge, exprs))
+                    else Left ("Invalid Expression. Only Integers are valid")
+        M_eq -> 
+            case (checkExprs exprList st) of 
+                Left err -> Left error
+                Right ei ->
+                    let
+                        types = map fst ei
+                        exprs = map snd ei
+                    in
+                    if (foldr (&&) (map (isNum) types))
+                    then Right (M_bool, I_app(I_eq, exprs))
+                    else Left ("Invalid Expression. Only Integers are valid")
+        M_not -> 
+            case (checkExprs exprList st) of 
+                Left err -> Left error
+                Right ei ->
+                    let
+                        types = map fst ei
+                        exprs = map snd ei
+                    in
+                    if (foldr (&&) (map (isBool) types))
+                    then Right (M_bool, I_app(I_not, exprs))
+                    else Left ("Invalid Expression. Only Integers are valid")
+        M_and -> 
+            case (checkExprs exprList st) of 
+                Left err -> Left error
+                Right ei ->
+                    let
+                        types = map fst ei
+                        exprs = map snd ei
+                    in
+                    if (foldr (&&) (map (isBool) types))
+                    then Right (M_bool, I_app(I_and, exprs))
+                    else Left ("Invalid Expression. Only Integers are valid")
+        M_or -> 
+            case (checkExprs exprList st) of 
+                Left err -> Left error
+                Right ei ->
+                    let
+                        types = map fst ei
+                        exprs = map snd ei
+                    in
+                    if (foldr (&&) (map (isBool) types))
+                    then Right (M_bool, I_app(I_or, exprs))
+                    else Left ("Invalid Expression. Only Integers are valid")
+                
+
+
+
 
 
 
@@ -98,11 +281,11 @@ checkStmts [] st = Right []
 checkStmts (stmt:stmts) st = case (checkStmt stmt st) of
     Left err    -> Left err
     Right iStmt -> case (checkStmts stmts) of
-        Left err    -> Left error
+        Left err'    -> Left err'
         Right iStmts-> Right iStmt:iStmts
 
 checkStmt::M_stmt -> ST -> Either String I_stmt
-checkStmt stmt st =  case stmt of
+checkStmt stmt st = case stmt of
     -- M_ass    (String, M_expr)
     -- I_ass    (Int,Int,I_expr)
     (M_ass(str, expr)) -> do
@@ -181,24 +364,41 @@ checkStmt stmt st =  case stmt of
 
             
             
-            
-            
+-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+-- I_fun (String,[I_fbody],Int,[I_stmt])         
+checkFuncs::[M_decl] -> ST -> [I_fbody]
+checkFuncs [] _ -> []
+checkFuncs (M_fun (fName , args, return, M_prog(decls, stmts)):fs) st =
+    let
+        varList = filter isVarDec decls
+        funList = filter isFunDec decls
+    in
+    case (insertArgs args (new_scope st)) of
+        Left err -> Left err
+        Right st' ->
+            case (insertVars varList st') of 
+                Left err -> Left err
+                Right st'' -> 
+                    case (insertFuncs funList st'') of
+                        Left err -> Left err
+                        Right st''' ->  Right I_fbody(fName, checkFuncs funList st''', length varList, checkStmts stmtList st''')      
             
             
             
 -- M_prog ([M_decl], [M_stmt])
 -- I_prog ([I_fbody],Int,[I_stmt])
 genIR::M_prog -> ST -> Either String I_prog
-genIR (M_prog (declList, stmtList)) st = p where
+genIR (M_prog (declList, stmtList)) st =
     let
         varList = filter isVarDec decList
         funList = filter isFunDec decList
     in
     case (insertVars varList st) of 
-    Left err -> Left err
-    Right st' -> case (insertFuncs funList st') of
         Left err -> Left err
-        Right st'' ->  Right I_prog(checkFuncs funList st'', length varList, checkStmts stmtList st'')
+        Right st' -> 
+            case (insertFuncs funList st') of
+                Left err -> Left err
+                Right st'' ->  Right I_prog(checkFuncs funList st'', length varList, checkStmts stmtList st'')
 
       
     
