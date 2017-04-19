@@ -12,6 +12,7 @@ import ErrM -- to show
 import System.Environment
 
 
+
 main = do
     args <- getArgs
     let fname = args !! 0

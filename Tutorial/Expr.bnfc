@@ -1,0 +1,17 @@
+layout "=" ;
+
+comment "\\" ;
+comment "{-" "-}" ;
+
+START.Start ::= "fun" Ident "=" "{" [Expr] "}" ;
+
+separator  Expr ";" ;
+
+
+EAdd.Expr ::= Expr "+" Term ;
+ETerm.Expr ::= Term  ;
+
+TMul.Term ::= Term "*" Factor ;
+TFact.Term ::= Factor ;
+
+SomeNum.Factor ::= Integer ;
