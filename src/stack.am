@@ -22,18 +22,17 @@ func_exp:
 	LOAD_R %sp
 	STORE_R %fp                    % set new %fp to top stack element
 	ALLOC 1
+	LOAD_I -3                        % set deallocation counter
 	LOAD_R %fp
 	LOAD_O -4
 	LOAD_I 0
 	APP EQ
 	JUMP_C if_label
-	LOAD_R %fp
-	LOAD_O 1
 	LOAD_I 1
+	LOAD_R %fp
+	STORE_O 1
 	JUMP_C finish_label
 if_label:
-	LOAD_R %fp
-	LOAD_O 1
 	LOAD_R %fp
 	LOAD_O -2
 	LOAD_R %fp
@@ -50,16 +49,20 @@ if_label:
 	LOAD_R %cp                % save program counter
 	JUMP func_exp                % call function
 	APP MUL
+	LOAD_R %fp
+	STORE_O 1
 finish_label: 
 	LOAD_R %fp
 	LOAD_O 1
 	LOAD_R %fp                   % load frame pointers
-	STORE_O -1                 % store <result> in first argument slot
+	STORE_O -4                 % store <result> in first argument slot
 	LOAD_R %fp                   % load frame pointer
 	LOAD_O 0                     % load <return>
 	LOAD_R %fp
-	STORE_O 0                 % place <return> below <result>
-	ALLOC -1                   % remove local elements
+	STORE_O -3                 % place <return> below <result>
+	LOAD_R %fp
+	LOAD_O 2                  % retrieve the deallocation pointer
+	ALLOC_S 
 	STORE_R %fp                  % restore old frame pointer
-	ALLOC 1                   % remove arguments - 2 for return pointer and result
+	ALLOC -1                   % remove arguments - 2 for return pointer and result
 	JUMP_S                       % jump to top of stack code address

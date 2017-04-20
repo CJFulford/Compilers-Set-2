@@ -39,7 +39,7 @@ stackFBody (I_fun(label, funcList, localArgs, localVars, stmtList)) = toSingleSt
     "\tLOAD_R %sp",
     "\tSTORE_R %fp                    % set new %fp to top stack element",
     "\tALLOC " ++ show localVars,
-    "\tLOAD_I " ++ (show (localVars + 2)) ++ "                        % set deallocation counter",
+    "\tLOAD_I " ++ (show (-(localVars + 2))) ++ "                        % set deallocation counter",
     stackStmts stmtList,
     stackFBodys funcList,
     -- code after loading return expression
@@ -49,9 +49,9 @@ stackFBody (I_fun(label, funcList, localArgs, localVars, stmtList)) = toSingleSt
     "\tLOAD_O 0                     % load <return>",
     "\tLOAD_R %fp",
     "\tSTORE_O " ++ (show (-(localArgs + 2))) ++ "                 % place <return> below <result>",
-    "\tLOAD_O " ++ (show (localVars + 1)) ++ "% retrieve the deallocation pointer"
-    "\tAPP NEG                          % negate it"
-    "\tALLOC_S "
+    "\tLOAD_R %fp",
+    "\tLOAD_O " ++ (show (localVars + 1)) ++ "                  % retrieve the deallocation pointer",
+    "\tALLOC_S ",
     "\tSTORE_R %fp                  % restore old frame pointer",
     "\tALLOC " ++ (show (-localArgs)) ++ "                   % remove arguments - 2 for return pointer and result",
     "\tJUMP_S                       % jump to top of stack code address"]
@@ -70,13 +70,13 @@ stackStmts (s:ss) = toSingleString[
 stackStmt::I_stmt -> String
 --I_ass
 stackStmt (I_ass(0, offset, expr)) = toSingleString [
+    stackExpr expr,
     "\tLOAD_R %fp", 
-    "\tLOAD_O " ++ show offset, 
-    stackExpr expr]
+    "\tSTORE_O " ++ show offset]
 stackStmt (I_ass(level, offset, expr)) = toSingleString [
+    stackStmt (I_ass(level-1, offset, expr)),
     "\tLOAD_R %fp", 
-    "\tLOAD_O -2", 
-    stackStmt (I_ass(level-1, offset, expr))]
+    "\tLOAD_O -2"]
 -- I_while
 stackStmt (I_while(expr, stmt)) = toSingleString [
     stackExpr expr, 
@@ -120,22 +120,20 @@ stackStmt (I_print_B expr) = toSingleString [
 stackStmt (I_return expr) = stackExpr expr
 -- I_block
 stackStmt (I_block(funcList, localVars, stmtList)) = toSingleString [
-    "\tLOAD_R %fp"]
+    "\tLOAD_R %fp",
+    "\tALLOC 2",
+    "\tLOAD_R %sp",
+    "\tSTORE_R %fp",
+    "\tALLOC " ++ (show localVars),
+    "\tLOAD_I " ++ (show (localVars + 3)),
+    stackStmts stmtList,
+    stackFBodys funcList,
+    "\tLOAD_R %fp",
+    "\tLOAD_O " ++ (show (localVars + 1)),
+    "\tAPP NEG",
+    "\tALLOC_S",
+    "\tSTORE_R %fp"]
 
-
-
-
-{-
-    stackFBodys funcList, 
-    "\tALLOC " ++ show localVars, 
-    stackStmts stmtList, 
-    "\tALLOC " ++ (show (-localVars))]
-  -}  
-    
-    
-    
-
-    
 -- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -- generate code from list of expressions
 stackExprs::[I_expr] -> String
@@ -189,9 +187,7 @@ stackOp I_or = "\tAPP OR"
 
 stackOp (I_call(label, 0)) = toSingleString [
     "\tALLOC 1                   % void on stack for return value",
-    "\tLOAD_R %fp                % static link",
-    "\tLOAD_O -2",    
-    "\tLOAD_O -2",    
+    "\tLOAD_R %fp                % static link",     
     "\tLOAD_R %fp                % dynamic link",
     "\tLOAD_R %cp                % save program counter",
     "\tJUMP " ++ label ++ "                % call function"]
