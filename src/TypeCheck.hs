@@ -369,7 +369,7 @@ checkFuncs (f:fs) st = case (checkFunc f st) of
             Right cfs -> Right (cf:cfs)
     
 checkFunc::M_decl -> ST -> Either String I_fbody
-checkFunc (M_fun(fName , argsInit, return, M_prog(decls, stmts))) st =
+checkFunc (M_fun(fName, argsInit, return, M_prog(decls, stmts))) st =
     let
         varList = filter isVarDec decls
         funList = filter isFunDec decls
@@ -389,7 +389,7 @@ checkFunc (M_fun(fName , argsInit, return, M_prog(decls, stmts))) st =
                                 Right iFunc ->
                                     case (checkStmts stmts st''') of 
                                         Left err'''    -> Left err'''
-                                        Right stmtList -> Right (I_fun("func_" ++ fName, iFunc, length varList, stmtList))
+                                        Right stmtList -> Right (I_fun("func_" ++ fName, iFunc, length args, length varList, stmtList))
             
             
             

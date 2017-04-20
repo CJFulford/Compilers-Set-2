@@ -5,7 +5,7 @@ import Text.PrettyPrint.GenericPretty
 data I_prog  = I_prog ([I_fbody],Int,[I_stmt])
             deriving (Eq, Show, Generic, Out)
 
-data I_fbody = I_fun (String,[I_fbody],Int,[I_stmt])
+data I_fbody = I_fun (String,[I_fbody],Int,Int,[I_stmt])
             deriving (Eq, Show, Generic, Out)
 
 data I_stmt = I_ass      (Int,Int,I_expr)

@@ -1,5 +1,7 @@
 module Main where
 
+-- /usr/bin/sml @SMLload=/home/411/AM/am+.x86-linux
+
 import LexM
 import ParM
 import AbsM
@@ -10,8 +12,6 @@ import Text.PrettyPrint.GenericPretty
 import ErrM -- to show
 
 import System.Environment
-
-
 
 main = do
     args <- getArgs
@@ -27,7 +27,9 @@ main = do
                 in
                 case (genIR ast) of
                     Left err -> putStrLn err
-                    Right ir -> pp ir
+                    Right ir -> do
+                        pp ir
+                        writeFile "stack.am" (stackI_prog ir)
                 
                
         Bad s -> error $ "Error in parsing: " ++ s 

@@ -1,0 +1,65 @@
+	LOAD_R %sp               % access pointer for program
+	LOAD_R %sp               % set the frame pointer for prog
+	STORE_R %fp
+	ALLOC 2
+	READ_I                    % read and store
+	LOAD_R %fp
+	STORE_O 1
+	READ_I                    % read and store
+	LOAD_R %fp
+	STORE_O 2
+	LOAD_R %fp
+	LOAD_O 2
+	ALLOC 1                   % void on stack for return value
+	LOAD_R %fp                % static link
+	LOAD_R %fp                % dynamic link
+	LOAD_R %cp                % save program counter
+	JUMP func_exp                % call function
+	PRINT_I
+	ALLOC -3
+	HALT
+func_exp:
+	LOAD_R %sp
+	STORE_R %fp                    % set new %fp to top stack element
+	ALLOC 1
+	LOAD_R %fp
+	LOAD_O -4
+	LOAD_I 0
+	APP EQ
+	JUMP_C if_label
+	LOAD_R %fp
+	LOAD_O 1
+	LOAD_I 1
+	JUMP_C finish_label
+if_label:
+	LOAD_R %fp
+	LOAD_O 1
+	LOAD_R %fp
+	LOAD_O -2
+	LOAD_R %fp
+	LOAD_O 1
+	LOAD_R %fp
+	LOAD_O -4
+	LOAD_I 1
+	APP SUB
+	LOAD_R %fp
+	LOAD_O 2
+	ALLOC 1                   % void on stack for return value
+	LOAD_R %fp                % static link
+	LOAD_R %fp                % dynamic link
+	LOAD_R %cp                % save program counter
+	JUMP func_exp                % call function
+	APP MUL
+finish_label: 
+	LOAD_R %fp
+	LOAD_O 1
+	LOAD_R %fp                   % load frame pointers
+	STORE_O -1                 % store <result> in first argument slot
+	LOAD_R %fp                   % load frame pointer
+	LOAD_O 0                     % load <return>
+	LOAD_R %fp
+	STORE_O 0                 % place <return> below <result>
+	ALLOC -1                   % remove local elements
+	STORE_R %fp                  % restore old frame pointer
+	ALLOC 1                   % remove arguments - 2 for return pointer and result
+	JUMP_S                       % jump to top of stack code address
